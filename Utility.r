@@ -1,5 +1,5 @@
 
-
+#
 ## distance function
 #' mean of shortest path lengths of all pariwised community genes 
 get.shortest.dist = function(distm, x, y){
