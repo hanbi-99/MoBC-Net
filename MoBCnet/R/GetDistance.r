@@ -1,37 +1,26 @@
-## Community distance function
-
-#' use.f can be choosed in the Utility.r
+#' Community distance function
+#' 
+#' Calculate the distance and z_score of the communities
+#' use.f can be choosed in the DistFunction.r
 #' ex) get.shortest.dist, get.kernel.dist, get.centre.dist, get.separation.dist, get.closest.dist
 #' As a default, get.closest.dist function is used to measure the distance between communities
 #' User also can make the dist function and use it for calculating community distance
-
 #' This function is made to know the z-score of a measured distance from distances of degree-preserved random networks
-#' hist.bin is used to make the similar degree distribution pool for making degree-preserved random networks
-
-
-hist.bin.function <- function(g.res,community.gl) {
-    
-    d.all = igraph::degree(g.res)
-    maxn = community.gl %>% lengths %>% max
-    maxn = max(c(maxn, 100))
-    hist.all <- hist(d.all, breaks= 300, plot= FALSE)
-    res <- lapply(1:c(sum(hist.all$counts>= maxn)+1), function(x) {
-        if (hist.all$counts[[x]] >= maxn) {
-            d.all[hist.all$breaks[x] < d.all & d.all <= hist.all$breaks[x+1]]
-        } else if (hist.all$counts[[x]] < maxn) {
-            d.all[hist.all$breaks[x] < d.all & d.all <= hist.all$breaks[length(hist.all$counts)+1]]
-        }
-        })
-    hist.bin <- res[1:c(sum(hist.all$counts>= maxn)+1)]
-    names(hist.bin) <- 1:c(sum(hist.all$counts>= maxn)+1)
-    hist.bin = lapply(hist.bin, names)
-    return(hist.bin)
-    }
+#' 
+#' @param network input
+#' @param community.genelist input
+#' @param hist.bin input
+#' @param random input
+#' @param overlap_filtering input
+#' @param method input
+#' @return distance results, community.genelist, network
+#' @export 
+#' 
 
 
 
-CommDistFunction <- function(toy_network,
-							 comm.genelist.final,
+CommDistFunction <- function(network,
+							 community.genelist,
                              hist.bin, 
 							 random = 1000,
 							 overlap_filtering = TRUE,
@@ -51,8 +40,8 @@ CommDistFunction <- function(toy_network,
         dist.function = method
     else {stop('Method function is wrong. Check the method function', call.=FALSE)}
 
-	g.res  <- preprocessedNetwork(toy_network)
-    comm.genelist <- CommunityGenelist(comm.genelist.final, g.res, overlap_filtering = overlap_filtering)
+	g.res  <- preprocessedNetwork(network)
+    comm.genelist <- CommunityGenelist(community.genelist, g.res, overlap_filtering = overlap_filtering)
 	distm <- igraph::distances(g.res, igraph::V(g.res), igraph::V(g.res))
 	hist.bin <- hist.bin.function(g.res, comm.genelist)  
 	cat(length(hist.bin), 'hist bins have been made with', length(unlist(hist.bin)), 'nodes', '\n')
@@ -99,6 +88,10 @@ CommDistFunction <- function(toy_network,
 		dist.rel = do.call(rbind, dist.rel)
 		}) #%>% dplyr::bind_rows %>% as.data.frame
 	results = do.call(rbind, results)
-	return(list('results'= results,'filtered.community'= comm.genelist,'graph'= g.res))
+	x <- new("MoBCresults",
+        MoBCresults = results,
+        filtered.communities = comm.genelist,
+        graph = g.res)
+	return(x)
 	}
 

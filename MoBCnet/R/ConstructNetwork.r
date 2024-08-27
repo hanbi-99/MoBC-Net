@@ -1,7 +1,11 @@
-
-
-# background network 구성
-
+#'preprocessedNetwork
+#' 
+#' Background network constitution
+#' compose largest component network from the dataframe of network
+#' @param dataframe input
+#' @return largest component netowrk
+#' @export 
+#' 
 preprocessedNetwork <- function(dataframe) {
      if (is.null(dataframe) | ncol(dataframe) < 2) {
         stop('Network dataframe file is missing.', call. = FALSE)
@@ -15,8 +19,15 @@ preprocessedNetwork <- function(dataframe) {
      }
 } 
 
-# community genelist 구성
-
+#' genelist.overlap
+#' 
+#' get rid of overlapped genes from the community gene list
+#' 
+#' @param genelist list of community genes
+#' @param overlap_filtering TRUE or FALSE
+#' @return genelist
+#' @export 
+#' 
 
 genelist.overlap <- function(genelist, overlap_filtering=TRUE) {
     if (overlap_filtering == TRUE){
@@ -41,6 +52,16 @@ genelist.overlap <- function(genelist, overlap_filtering=TRUE) {
         return(genelist)
     }
 }
+
+#' CommunityGenelist
+#' 
+#' filtering the community genelist from the graph of network
+#' 
+#' @param genelist list of community genes
+#' @param graph network graph
+#' @param overlap_filtering TRUE or FALSE
+#' @export 
+#' 
 
 CommunityGenelist <- function(genelist, g, overlap_filtering = TRUE) {
     if (is.null(genelist) | length(genelist) <= 1) {
