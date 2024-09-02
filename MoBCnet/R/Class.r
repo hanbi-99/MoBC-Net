@@ -12,9 +12,12 @@
 
 
 
+
+setOldClass("igraph")
+
 setClass("MoBCresult",
         representation = representation(
-            MoBCresult = "data.frame",
+            MoBCresults = "data.frame",
             filtered.communities = "list",
             graph = "igraph"
             )

@@ -21,7 +21,6 @@
 
 CommDistFunction <- function(network,
 							 community.genelist,
-                             hist.bin, 
 							 random = 1000,
 							 overlap_filtering = TRUE,
                              method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
@@ -35,10 +34,11 @@ CommDistFunction <- function(network,
             kernel = get.kernel.dist,
             centre = get.centre.dist,
             separation = get.separation.dist)
-
-    } else if(is.function(method))
+    } else if(is.function(method)){
         dist.function = method
-    else {stop('Method function is wrong. Check the method function', call.=FALSE)}
+    } else {
+        stop('Method function is wrong. Check the method function', call.=FALSE)
+    }
 
 	g.res  <- preprocessedNetwork(network)
     comm.genelist <- CommunityGenelist(community.genelist, g.res, overlap_filtering = overlap_filtering)
@@ -88,7 +88,7 @@ CommDistFunction <- function(network,
 		dist.rel = do.call(rbind, dist.rel)
 		}) #%>% dplyr::bind_rows %>% as.data.frame
 	results = do.call(rbind, results)
-	x <- new("MoBCresults",
+	x <- new("MoBCresult",
         MoBCresults = results,
         filtered.communities = comm.genelist,
         graph = g.res)

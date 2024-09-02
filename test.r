@@ -38,6 +38,8 @@ dist.results <- CommDistFunction(
 
 names(dist.results)
 
+class(dist.results[[3]])
+
 re1= Get.ConnectingGene(dist.results, 'union.C6_16','union.C2_62')
 re2= Get.ConnectingGene(dist.results, 'Stat3','union.C2_62')
 re3 = Get.Centrality(dist.results, 'union.C6_16','union.C2_62')
