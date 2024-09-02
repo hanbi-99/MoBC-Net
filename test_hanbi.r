@@ -1,29 +1,79 @@
+
+
+
+
+library(devtools)
+library(usethis)
+
+
+#--------- https://usethis.r-lib.org/
+
+# Create a new package -------------------------------------------------
+path <- file.path("/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/", "MoBCnet")
+create_package(path)
+# only needed since this session isn't interactive
+proj_activate(path)
+
+
+# Modify the description ----------------------------------------------
+use_mit_license("Testname")
+
+use_package("igraph", 'imports')
+use_package("magrittr",'imports')
+
+
+# Set up other files -------------------------------------------------
+use_readme_md()
+
+use_news_md()
+
+use_test("my-test")
+
+x <- 1
+y <- 2
+use_data(x, y)
+
+# Use git ------------------------------------------------------------
+use_git()
+
+
+
+#--------------- TEST
+
+
+# https://r-pkgs.org/man.html
+
+
+setwd('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/MoBCnet')
+# devtools::document()
+
+
+
+
+
+dir.set='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/MoBCnet/R/'
+ff = list.files(dir.set)
+
+
+for(ii in ff) source(paste0(dir.set,ii))
+
 library(magrittr)
-
-
-
 
 user.id <- getwd()
 user.id <- gsub('/.*','',gsub('/Users/','',user.id))
 
 
 if(user.id=='hanbilee'){
-    dir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package')
+    fdir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package')
 }else if(user.id=='yoomibaek'){
     dir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/Community distance/Package')
 }
 
-source(paste0(dir.set,'/package_script/ConstructNetwork.r'))
-source(paste0(dir.set,'/package_script/Utility.r'))
-source(paste0(dir.set,'/package_script/GetDistance.r'))
-source(paste0(dir.set,'/package_script/Module_centrality.r'))
-
-
 
 #-------- Run
 # toy network csv 파일 및 community gene list 파일 받기
-toy_network<- read.csv(paste0(dir.set,"/toy_example/toy_network.csv"))
-comm.genelist.final <- readRDS(paste0(dir.set,"/toy_example/comm.genelist.rds"))
+toy_network<- read.csv(paste0(fdir.set,"/toy_example/toy_network.csv"))
+comm.genelist.final <- readRDS(paste0(fdir.set,"/toy_example/comm.genelist.rds"))
 
 
 # GetDistance.r
@@ -32,10 +82,14 @@ dist.results <- CommDistFunction(
                  toy_network,
                  comm.genelist.final,
                  random= 100,
-                 overlap_filtering = TRUE,
-                 method= 'closest')
+                 overlap_filtering = TRUE
+                #  method= 'closest'
+                 )
 
+# network=toy_network
+# community.genelist = comm.genelist.final
 
+class(dist.results)
 names(dist.results)
 
 re1= Get.ConnectingGene(dist.results, 'union.C6_16','union.C2_62')
