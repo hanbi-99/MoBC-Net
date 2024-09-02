@@ -7,12 +7,11 @@
 #' User also can make the dist function and use it for calculating community distance
 #' This function is made to know the z-score of a measured distance from distances of degree-preserved random networks
 #' 
-#' @param network input
-#' @param community.genelist input
-#' @param hist.bin input
-#' @param random input
-#' @param overlap_filtering input
-#' @param method input
+#' @param network network dataframe
+#' @param community.genelist community genes list
+#' @param random the number of random network formation and distance calculation
+#' @param overlap_filtering overlap genes filtering (TRUE/FALSE)
+#' @param method distance measuring method
 #' @return distance results, community.genelist, network
 #' @export 
 #' 
