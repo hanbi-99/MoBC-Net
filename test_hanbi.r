@@ -20,6 +20,7 @@ use_mit_license("Testname")
 
 use_package("igraph", 'imports')
 use_package("magrittr",'imports')
+use_package("circlize",'imports')
 
 
 # Set up other files -------------------------------------------------
@@ -97,6 +98,8 @@ dist.results <- CommDistFunction(
 # network=toy_network
 # community.genelist = comm.genelist.final
 
+summary(dist.results)
+
 class(dist.results)
 names(dist.results)
 
@@ -173,7 +176,7 @@ toy_network <- read.csv(paste0(fdir.set,"/toy_example/human.ppi.network.csv"), r
 
 gl1 = strsplit(gl$Genes, ', ') %>% 'names<-'(gl$Pathway) %>% lapply(toupper)
 
-
+gl1 = readRDS(paste0(fdir.set,'/toy_example/comm.bl1.list.rds'))
 
 
 # human.ppi.network.csv : test network
@@ -192,11 +195,68 @@ dist.results <- CommDistFunction(
 # network=toy_network
 # community.genelist = comm.genelist.final
 
+summary(dist.results)
 class(dist.results)
-names(dist.results)
 
-plotDist(dist.results)
+dist.results@MoBCresults %>% dplyr::arrange(z_score)
+
 re1 = MoBC.genes(dist.results, 'TP53','Cell Cycle')
 
 head(re1)
+
+dm = dist.results@MoBCresults
+
+rel = lapply(1:nrow(dm),function(vv){
+    v1 = dm[vv,1]
+    v2 = dm[vv,2]
+
+    re1 = MoBC.genes(dist.results, v1,v2)
+    re1$comm1 = v1
+    re1$comm2 = v2
+    re1$rank = rank(-re1$score)
+    return(re1)
+})
+
+lapply(rel, head)
+rel = lapply(rel, function(xx) subset(xx, gene=='STAT3'))
+rel = do.call(rbind, rel)
+
+
+re1 = MoBC.genes(dist.results, '1','2')
+
+rel %>% dplyr::arrange(rank)
+
+
+p1 = plot.MoBC.genes(dist.results,  community1.name='1', community2.name='2', 
+            top=10, community1.color = 'lightpink',community2.color = 'lightblue1')
+
+p2 = plot.Dist(dist.results)
+
+list.files('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/')
+
+png(
+	file='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package/toy_plot/comm1_5_plotMOBC.png',
+	width = 17, height =17, units = "in", res = 300,  bg='white')
+
+plot.MoBC.genes(dist.results,  community1.name='1', community2.name='5', 
+            top=10, community1.color = 'lightpink',community2.color = 'lightblue1')
+
+dev.off()
+
+
+
+png(
+	file='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package/toy_plot/distMOBC.png',
+	width = 5, height =10, type='cairo', units = "in", res = 300,  bg='transparent')
+plot.Dist(dist.results)
+
+dev.off()
+
+
+# g = dist.results@graph
+# community1 = dist.results@filtered.communities[['1']]
+# community2 = dist.results@filtered.communities[['2']]
+
+# community1.name = '1'
+# community2.name = '2'
 

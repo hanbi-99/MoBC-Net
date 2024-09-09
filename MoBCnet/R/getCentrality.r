@@ -195,10 +195,6 @@ get.freq <-function(g, snode, enode){
 	return(edges) #!!
 }
 
-g = dist.results@graph
-community1 = dist.results@filtered.communities[['PI3K']]
-community2 = dist.results@filtered.communities[['Tgfb']]
-
 
 cal.MoBCgenes <- function(g, community1, community2){
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
@@ -242,7 +238,7 @@ cal.MoBCgenes <- function(g, community1, community2){
 	score.df = data.frame(gene=allg,community1.score =as.numeric(r.score), community2.score=as.numeric(c.score))
     score.df$score = score.df$community1.score + score.df$community2.score
 	score.df$tag = 'bridge'
-	score.df$tag[rownames(score.df) %in% c(community1, community2)] = 'community genes'
+	score.df$tag[score.df$gene %in% c(community1, community2)] = 'community genes'
 	score.df = score.df %>% dplyr::arrange(-score)
 
 	return(score.df)
@@ -286,6 +282,77 @@ MoBC.genes <- function(MoBC.result, community1.name, community2.name){
 #' 
 #' @title plotDist
 #' @param MoBC.result results from CommDistFunction function
+#' @param community1.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
+#' @param community2.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
+#' @param top 
+#' @param community1.color 
+#' @param community1.name 
+#' @returns plot
+#' @export
+#' @examples
+#' plot.MoBC.genes(MoBC.result, community1.name, community2.name, 
+#'                    top=10, community1.color='lightblue1',community2.color='lightpink')
+
+
+
+plot.MoBC.genes <- function(MoBC.result, community1.name, community2.name, 
+                    top=10, community1.color='lightblue1',community2.color='lightpink'){
+	if(!is(MoBC.result, 'MoBCresult')){
+		stop("input should be MoBC class", call. = FALSE)
+	}
+	communities = MoBC.result@filtered.communities
+
+	if(!all(c(community1.name, community2.name) %in% names(communities))){
+		stop('community name should be included in name of pre-defined community', call. = FALSE)
+	}
+
+	re = cal.MoBCgenes(MoBC.result@graph, 
+					community1=MoBC.result@filtered.communities[[community1.name]], 
+					community2=MoBC.result@filtered.communities[[community2.name]])
+    re = re[1:top,]
+
+    useg = unlist(MoBC.result@filtered.communities[c(community1.name, community2.name)])
+    useg = c(useg, re$gene)
+
+    g2 <- igraph::induced_subgraph(MoBC.result@graph, useg)
+
+	layout <- igraph::layout_with_fr(g2)
+    
+    vcolor = rep('grey', length(igraph::V(g2)$name))
+    vcolor[igraph::V(g2)$name %in% MoBC.result@filtered.communities[[community1.name]]] = community1.color
+    vcolor[igraph::V(g2)$name %in% MoBC.result@filtered.communities[[community2.name]]] = community2.color
+
+    tcolor = rep('white', length(igraph::V(g2)$name))
+    tcolor[igraph::V(g2)$name %in% re$gene] = 'red'
+
+	plre = plot(g2, 
+		layout = layout, 
+		# mark.groups = split(V(g)$name,clv),
+		# vertex.label = fgid1[match(V(g)$name, fgid1$EntrezID),'gene_name'],
+		# vertex.label = '', #vns
+		vertex.color=vcolor,
+		vertex.frame.width=5,
+		vertex.frame.color=tcolor,#'white',
+		edge.color ='grey', #adjustcolor('black', alpha=0.6),
+		# vertex.size= (cln[V(cl.g2)$name]^0.5)*4,
+		vertex.size=10,
+		# vertex.label.dist=1,
+		# vertex.frame.color = 'grey90',
+		vertex.label.color='black',
+		# vertex.label.font=ifelse(V(g)$name %in% np.gl[[pn]], 2,1),
+		vertex.label.size = 0.001
+		# edge.width=(igraph::E(g2)$weight)*2
+	)
+    return(plre)
+}
+
+
+
+#' Calculate centrality between two modules from MoBC result 
+#' 
+#' 
+#' @title plotDist
+#' @param MoBC.result results from CommDistFunction function
 #' @param pval cut-off for filtering edges between communities
 #' @returns plot
 #' @export
@@ -295,7 +362,7 @@ MoBC.genes <- function(MoBC.result, community1.name, community2.name){
 
 
 
-plotDist <- function(MoBC.result, pval=0.05){
+plot.Dist <- function(MoBC.result, pval=0.05){
 	if(!is(MoBC.result, 'MoBCresult')){
 		stop("input should be MoBC class", call. = FALSE)
 	}
@@ -306,6 +373,17 @@ plotDist <- function(MoBC.result, pval=0.05){
 	ntkg = igraph::graph_from_data_frame(sig.dist[,c('community_1','community_2','weight')], directed=FALSE)
 	ntkg = igraph::simplify(ntkg, remove.multiple = TRUE, remove.loops = TRUE)
 
+    maxn = max(lengths(MoBC.result@filtered.communities))
+    col_fun = circlize::colorRamp2(c(0, round(maxn/4),round(maxn/4)*2,round(maxn/4)*3,maxn), c("grey", "orange", "#FF6566","red","darkred"))
+    colv = sapply(igraph::V(ntkg)$name, function(gn){
+        xx = col_fun(length(MoBC.result@filtered.communities[[gn]])) %>% c
+        return(xx)
+    }) %>% 'names<-'(igraph::V(ntkg)$name)
+    
+    commn = lengths(MoBC.result@filtered.communities)[igraph::V(ntkg)$name]
+    sizev = (commn-min(commn))/(max(commn)-min(commn))
+    sizev = sizev*20+50
+
 	layout <- igraph::layout_with_fr(ntkg)
 
 	plre = plot(ntkg, 
@@ -313,20 +391,22 @@ plotDist <- function(MoBC.result, pval=0.05){
 		# mark.groups = split(V(g)$name,clv),
 		# vertex.label = fgid1[match(V(g)$name, fgid1$EntrezID),'gene_name'],
 		# vertex.label = '', #vns
-		vertex.color='grey95',
+		vertex.color=colv,
 		vertex.frame.width=0.3,
 		vertex.frame.color='white',
-		edge.color =adjustcolor('red', alpha=0.6),
+		edge.color ="grey",#adjustcolor('black', alpha=0.6),
 		# vertex.size= (cln[V(cl.ntkg)$name]^0.5)*4,
-		vertex.size=10,
+		vertex.size=sizev,
 		# vertex.label.dist=1,
 		# vertex.frame.color = 'grey90',
 		vertex.label.color='black',
 		# vertex.label.font=ifelse(V(g)$name %in% np.gl[[pn]], 2,1),
-		vertex.label.size = 0.001,
-		edge.width=(igraph::E(ntkg)$weight)*2
+		vertex.label.size = 0.1,
+		edge.width=(rank(-igraph::E(ntkg)$weight))
 	)
-	return(plre)
+    df1 = data.frame(n = lengths(MoBC.result@filtered.communities)[igraph::V(ntkg)$name], col=colv) %>% unique
+    df1 = df1[order(df1$n, decreasing=T),]
+    legend("bottomright", col=df1[,2], pch=19, legend=df1[,1], title='Module size')
 }
 
 

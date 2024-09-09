@@ -23,3 +23,7 @@ setClass("MoBCresult",
             )
          )
 
+setMethod("summary", "MoBCresult",
+    function(object){
+      head(object@MoBCresults)
+    })
