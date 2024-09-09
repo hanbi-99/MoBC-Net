@@ -75,6 +75,14 @@ if(user.id=='hanbilee'){
 toy_network<- read.csv(paste0(fdir.set,"/toy_example/toy_network.csv"))
 comm.genelist.final <- readRDS(paste0(fdir.set,"/toy_example/comm.genelist.rds"))
 
+# cancer pathway genes2.csv : RTK, RAS 합쳐서
+# cancer pathway genes.csv : RTK, RAS (이걸로 tp53 vs cell cycle)
+# --> gene list toupper
+
+
+
+# human.ppi.network.csv : test network
+
 
 # GetDistance.r
 # community distance measure, method에서 distance measure 방식 설정
@@ -114,7 +122,7 @@ g = dist.results$graph
 community1=dist.results$filtered.community[['union.C1_83']]
 community2=dist.results$filtered.community[['union.C2_62']]
 
-
+plotDist(dist.results)
 
 #-------- other network (Hanbi)
 
@@ -143,15 +151,52 @@ dist.results <- CommDistFunction(
                  method= 'closest')
 
 
+class(dist.results)
+dist.results@MoBCresults %>% dplyr::arrange(z_score)
+
+re1= MoBC.genes(dist.results, 'cancer_3','cancer_8') # 76905 : 'Lrg1'
+re1$gene_name = fgid1[match(re1$gene, fgid1$EntrezID),'gene_name']
+head(re1,20)
+
+plotDist(dist.results)
+
+
+#---------------------- validation set
+# cancer pathway genes2.csv : RTK, RAS 합쳐서
+# cancer pathway genes.csv : RTK, RAS (이걸로 tp53 vs cell cycle)
+# --> gene list toupper
+
+# toy network csv 파일 및 community gene list 파일 받기
+
+gl<- read.csv(paste0(fdir.set,"/toy_example/cancer pathway genes.csv"))
+toy_network <- read.csv(paste0(fdir.set,"/toy_example/human.ppi.network.csv"), row.names=1)
+
+gl1 = strsplit(gl$Genes, ', ') %>% 'names<-'(gl$Pathway) %>% lapply(toupper)
+
+
+
+
+# human.ppi.network.csv : test network
+
+
+# GetDistance.r
+# community distance measure, method에서 distance measure 방식 설정
+dist.results <- CommDistFunction(
+                 toy_network,
+                 gl1,
+                 random= 100,
+                 overlap_filtering = TRUE
+                #  method= 'closest'
+                 )
+
+# network=toy_network
+# community.genelist = comm.genelist.final
+
+class(dist.results)
 names(dist.results)
-dist.results$results %>% dplyr::arrange(z_score)
 
-re1= Get.ConnectingGene(dist.results, '76905','cancer_1') # 76905 : 'Lrg1'
-re1$gene_name = fgid1[match(rownames(re1), fgid1$EntrezID),'gene_name']
+plotDist(dist.results)
+re1 = MoBC.genes(dist.results, 'TP53','Cell Cycle')
+
 head(re1)
-re3 = Get.Centrality(dist.results, 'cancer_2','cancer_8')
-re3$gene_name = fgid1[match(rownames(re3), fgid1$EntrezID),'gene_name']
-head(re3)
-
-
 
