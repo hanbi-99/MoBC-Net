@@ -2,8 +2,8 @@
 #' 
 #' Background network constitution
 #' compose largest component network from the dataframe of network
-#' @param dataframe input
-#' @return largest component netowrk
+#' @param dataframe network dataframe input
+#' @return largest component netowork
 #' @export 
 #' 
 preprocessedNetwork <- function(dataframe) {
