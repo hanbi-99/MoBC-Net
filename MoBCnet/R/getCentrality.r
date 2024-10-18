@@ -197,10 +197,111 @@ get.freq <-function(g, snode, enode){
 
 get.freq.v2 <-function(g, snode, enode){
 	edges = igraph::all_shortest_paths(g, snode, enode)
-	edges = edges$res %>% lapply(function(xx)  names(xx))
+	edges = edges$res %>% lapply(function(xx)  setdiff(names(xx), names(xx)[1]))
 	# etab = edges %>% unlist
 	return(edges) #!!
 }
+
+# cal.MoBCgenes.v1 <- function(g, community1, community2){
+# 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
+# 	shortestm = igraph::distances(g, community1, community2)
+# 	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
+
+#     allg = igraph::V(g)$name %>% as.character()
+#     # comm1
+#     r.sp.genel = sapply(names(rmin), function(start.node){
+# 		end.node = rmin[[start.node]]
+# 		etab = get.freq(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     r.pathn = sum(lengths(r.sp.genel))
+#     r.tab = unlist(r.sp.genel) %>% table %>% sort
+
+#     # comm2
+# 	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
+#     c.sp.genel = sapply(names(cmin), function(start.node){
+# 		end.node = cmin[[start.node]]
+# 		etab = get.freq(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     c.pathn = sum(lengths(c.sp.genel))
+#     c.tab = unlist(c.sp.genel) %>% table %>% sort
+
+
+#     r.num = length(community1)
+#     c.num = length(community2)
+
+#     r.score = r.tab/r.pathn*r.num/sum(r.num+c.num)
+#     c.score = c.tab/c.pathn*c.num/sum(r.num+c.num)
+    
+#     r.score = r.score[allg] %>% 'names<-'(allg)
+#     c.score = c.score[allg] %>% 'names<-'(allg)
+#     r.score[is.na(r.score)] = 0
+#     c.score[is.na(c.score)] = 0
+
+# 	score.df = data.frame(gene=allg,community1.score =as.numeric(r.score), community2.score=as.numeric(c.score))
+#     score.df$score = score.df$community1.score + score.df$community2.score
+# 	score.df$tag = 'bridge'
+# 	score.df$tag[score.df$gene %in% c(community1, community2)] = 'community genes'
+# 	score.df = score.df %>% dplyr::arrange(-score)
+
+# 	return(score.df)
+# }
+
+
+
+
+# cal.MoBCgenes.v2 <- function(g, community1, community2){
+# 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
+# 	shortestm = igraph::distances(g, community1, community2)
+# 	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
+
+#     allg = igraph::V(g)$name %>% as.character()
+#     # comm1
+#     r.sp.genel = sapply(names(rmin), function(start.node){
+# 		end.node = rmin[[start.node]]
+# 		etab = get.freq.v2(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     r.pathn = sum(lengths(r.sp.genel))
+#     r.tab = unlist(r.sp.genel) %>% table %>% sort
+
+#     # comm2
+# 	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
+#     c.sp.genel = sapply(names(cmin), function(start.node){
+# 		end.node = cmin[[start.node]]
+# 		etab = get.freq.v2(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     c.pathn = sum(lengths(c.sp.genel))
+#     c.tab = unlist(c.sp.genel) %>% table %>% sort
+
+
+#     r.num = length(community1)
+#     c.num = length(community2)
+
+#     r.score = r.tab/r.pathn*r.num/sum(r.num+c.num)
+#     c.score = c.tab/c.pathn*c.num/sum(r.num+c.num)
+    
+#     r.score = r.score[allg] %>% 'names<-'(allg)
+#     c.score = c.score[allg] %>% 'names<-'(allg)
+#     r.score[is.na(r.score)] = 0
+#     c.score[is.na(c.score)] = 0
+
+# 	score.df = data.frame(gene=allg,community1.score =as.numeric(r.score), community2.score=as.numeric(c.score))
+#     score.df$score = score.df$community1.score + score.df$community2.score
+# 	score.df$tag = 'bridge'
+# 	score.df$tag[score.df$gene %in% c(community1, community2)] = 'community genes'
+# 	score.df = score.df %>% dplyr::arrange(-score)
+
+# 	return(score.df)
+# }
+
+
 
 cal.MoBCgenes <- function(g, community1, community2){
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
@@ -233,8 +334,8 @@ cal.MoBCgenes <- function(g, community1, community2){
     r.num = length(community1)
     c.num = length(community2)
 
-    r.score = r.tab/r.pathn*r.num/sum(r.num+c.num)
-    c.score = c.tab/c.pathn*c.num/sum(r.num+c.num)
+    r.score = r.tab/r.pathn*c.num/sum(r.num+c.num) #!!
+    c.score = c.tab/c.pathn*r.num/sum(r.num+c.num) #!!
     
     r.score = r.score[allg] %>% 'names<-'(allg)
     c.score = c.score[allg] %>% 'names<-'(allg)
@@ -249,58 +350,6 @@ cal.MoBCgenes <- function(g, community1, community2){
 
 	return(score.df)
 }
-
-
-
-
-cal.MoBCgenes.v2 <- function(g, community1, community2){
-	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
-	shortestm = igraph::distances(g, community1, community2)
-	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
-
-    allg = igraph::V(g)$name %>% as.character()
-    # comm1
-    r.sp.genel = sapply(names(rmin), function(start.node){
-		end.node = rmin[[start.node]]
-		etab = get.freq.v2(g, start.node, end.node)
-		return(etab)
-	})
-    
-    r.pathn = sum(lengths(r.sp.genel))
-    r.tab = unlist(r.sp.genel) %>% table %>% sort
-
-    # comm2
-	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
-    c.sp.genel = sapply(names(cmin), function(start.node){
-		end.node = cmin[[start.node]]
-		etab = get.freq.v2(g, start.node, end.node)
-		return(etab)
-	})
-    
-    c.pathn = sum(lengths(c.sp.genel))
-    c.tab = unlist(c.sp.genel) %>% table %>% sort
-
-
-    r.num = length(community1)
-    c.num = length(community2)
-
-    r.score = r.tab/r.pathn*r.num/sum(r.num+c.num)
-    c.score = c.tab/c.pathn*c.num/sum(r.num+c.num)
-    
-    r.score = r.score[allg] %>% 'names<-'(allg)
-    c.score = c.score[allg] %>% 'names<-'(allg)
-    r.score[is.na(r.score)] = 0
-    c.score[is.na(c.score)] = 0
-
-	score.df = data.frame(gene=allg,community1.score =as.numeric(r.score), community2.score=as.numeric(c.score))
-    score.df$score = score.df$community1.score + score.df$community2.score
-	score.df$tag = 'bridge'
-	score.df$tag[score.df$gene %in% c(community1, community2)] = 'community genes'
-	score.df = score.df %>% dplyr::arrange(-score)
-
-	return(score.df)
-}
-
 
 
 
