@@ -22,6 +22,8 @@ CommDistFunction <- function(network,
 							 community.genelist,
 							 random = 1000,
 							 overlap_filtering = TRUE,
+                             ratio = 0.1,
+                             random.n = 1000,
                              method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
     # cat(method,'\n')
     if (is.character(method)){
@@ -42,8 +44,10 @@ CommDistFunction <- function(network,
 	g.res  <- preprocessedNetwork(network)
     comm.genelist <- CommunityGenelist(community.genelist, g.res, overlap_filtering = overlap_filtering)
 	distm <- igraph::distances(g.res, igraph::V(g.res), igraph::V(g.res))
-	hist.bin <- hist.bin.function(g.res, comm.genelist)  
-	cat(length(hist.bin), 'hist bins have been made with', length(unlist(hist.bin)), 'nodes', '\n')
+	# hist.bin <- hist.bin.function(g.res, comm.genelist)  
+    hist.bin = hist.bin.function.v2(g.res, comm.genelist,random.n,ratio)
+
+    cat(length(hist.bin), 'hist bins have been made with', length(unlist(hist.bin)), 'nodes', '\n')
 	if (!(dim(distm)[1] == length(igraph::V(g.res)) & dim(distm)[2] == length(igraph::V(g.res)))) {
 		stop('Distance matrix is wrongly constructed. Check the network dataframe', call.=FALSE)
 	}
@@ -81,7 +85,7 @@ CommDistFunction <- function(network,
 			pval = sum(comm.distance.list<xval)/random
 
 			df1 = data.frame(community_1=names(comm.genelist)[m], community_2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
-			cat('-end\n')
+			# cat('-end\n')
 			return(df1)
 			})
 		dist.rel = do.call(rbind, dist.rel)
