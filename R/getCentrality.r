@@ -358,7 +358,7 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
 
 
 
-cal.MoBC.random <- function(g, community1, community2,random,ratio,show.binning=FALSE){
+cal.MoBC.random <- function(g, community1, community2,random,ratio,show.binning){
 
     hist.bin = hist.bin.function.v2(g, c(community1, community2),random,ratio, show.binning)
     allg = igraph::V(g)$name %>% as.character()
@@ -443,7 +443,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
 
 
     if(cal.p){
-        random.mat = cal.MoBC.random(g, community1, community2,random,ratio)
+        random.mat = cal.MoBC.random(g, community1, community2,random,ratio,show.binning=FALSE)
         pval = sapply(score.df$gene, function(gn){
             xval = score.df[match(gn, score.df$gene),'score']
             pval = sum(random.mat[gn,]>xval)/random
