@@ -358,9 +358,9 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
 
 
 
-cal.MoBC.random <- function(g, community1, community2,random,ratio){
+cal.MoBC.random <- function(g, community1, community2,random,ratio,show.binning=FALSE){
 
-    hist.bin = hist.bin.function.v2(g, c(community1, community2),random,ratio)
+    hist.bin = hist.bin.function.v2(g, c(community1, community2),random,ratio, show.binning)
     allg = igraph::V(g)$name %>% as.character()
 
     cl1g = community1
