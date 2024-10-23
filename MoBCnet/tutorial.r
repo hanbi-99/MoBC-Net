@@ -57,3 +57,5 @@ plot.MoBC.genes(MoBC.result=mobc.res, module1.name='M2', module2.name='M3',
                     top=5, module1.color='lightblue1',module2.color='lightpink')
 
 plot.Dist(MoBC.result = mobc.res, pval=0.005)
+
+
