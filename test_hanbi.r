@@ -1,29 +1,89 @@
+
+
+
+
+library(devtools)
+library(usethis)
+
+
+#--------- https://usethis.r-lib.org/
+
+# Create a new package -------------------------------------------------
+path <- file.path("/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/", "MoBCnet")
+create_package(path)
+# only needed since this session isn't interactive
+proj_activate(path)
+
+
+# Modify the description ----------------------------------------------
+use_mit_license("Testname")
+
+use_package("igraph", 'imports')
+use_package("magrittr",'imports')
+use_package("circlize",'imports')
+use_package("colorspace",'imports')
+
+
+# Set up other files -------------------------------------------------
+use_readme_md()
+
+use_news_md()
+
+use_test("my-test")
+
+x <- 1
+y <- 2
+use_data(x, y)
+
+# Use git ------------------------------------------------------------
+use_git()
+
+
+
+#--------------- TEST
+
+
+# https://r-pkgs.org/man.html
+
+
+setwd('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/MoBCnet')
+# devtools::document()
+
+
+
+
+
+dir.set='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/hanbi/Script/Project/MoBC-net/MoBCnet/R/'
+ff = list.files(dir.set)
+
+
+for(ii in ff) source(paste0(dir.set,ii))
+
 library(magrittr)
-
-
-
 
 user.id <- getwd()
 user.id <- gsub('/.*','',gsub('/Users/','',user.id))
 
 
 if(user.id=='hanbilee'){
-    dir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package')
+    fdir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package')
 }else if(user.id=='yoomibaek'){
     dir.set = paste0('/Users/',user.id,'/Library/CloudStorage/OneDrive-GCCORP/Community distance/Package')
 }
 
-source(paste0(dir.set,'/package_script/ConstructNetwork.r'))
-source(paste0(dir.set,'/package_script/Utility.r'))
-source(paste0(dir.set,'/package_script/GetDistance.r'))
-source(paste0(dir.set,'/package_script/Module_centrality.r'))
-
-
 
 #-------- Run
 # toy network csv 파일 및 community gene list 파일 받기
-toy_network<- read.csv(paste0(dir.set,"/toy_example/toy_network.csv"))
-comm.genelist.final <- readRDS(paste0(dir.set,"/toy_example/comm.genelist.rds"))
+toy_network<- read.csv(paste0(fdir.set,"/toy_example/toy_network.csv"))
+comm.genelist.final <- readRDS(paste0(fdir.set,"/toy_example/comm.genelist.rds"))
+
+# cancer pathway genes2.csv : RTK, RAS 합쳐서
+# cancer pathway genes.csv : RTK, RAS (이걸로 tp53 vs cell cycle)
+# --> gene list toupper
+
+
+
+# human.ppi.network.csv : test network
 
 
 # GetDistance.r
@@ -32,10 +92,16 @@ dist.results <- CommDistFunction(
                  toy_network,
                  comm.genelist.final,
                  random= 100,
-                 overlap_filtering = TRUE,
-                 method= 'closest')
+                 overlap_filtering = TRUE
+                #  method= 'closest'
+                 )
 
+# network=toy_network
+# community.genelist = comm.genelist.final
 
+summary(dist.results)
+
+class(dist.results)
 names(dist.results)
 
 re1= Get.ConnectingGene(dist.results, 'union.C6_16','union.C2_62')
@@ -60,7 +126,7 @@ g = dist.results$graph
 community1=dist.results$filtered.community[['union.C1_83']]
 community2=dist.results$filtered.community[['union.C2_62']]
 
-
+plotDist(dist.results)
 
 #-------- other network (Hanbi)
 
@@ -89,15 +155,109 @@ dist.results <- CommDistFunction(
                  method= 'closest')
 
 
-names(dist.results)
-dist.results$results %>% dplyr::arrange(z_score)
+class(dist.results)
+dist.results@MoBCresults %>% dplyr::arrange(z_score)
 
-re1= Get.ConnectingGene(dist.results, '76905','cancer_1') # 76905 : 'Lrg1'
-re1$gene_name = fgid1[match(rownames(re1), fgid1$EntrezID),'gene_name']
+re1= MoBC.genes(dist.results, 'cancer_3','cancer_8') # 76905 : 'Lrg1'
+re1$gene_name = fgid1[match(re1$gene, fgid1$EntrezID),'gene_name']
+head(re1,20)
+
+plotDist(dist.results)
+
+
+#---------------------- validation set
+# cancer pathway genes2.csv : RTK, RAS 합쳐서
+# cancer pathway genes.csv : RTK, RAS (이걸로 tp53 vs cell cycle)
+# --> gene list toupper
+
+# toy network csv 파일 및 community gene list 파일 받기
+
+gl<- read.csv(paste0(fdir.set,"/toy_example/cancer pathway genes.csv"))
+toy_network <- read.csv(paste0(fdir.set,"/toy_example/human.ppi.network.csv"), row.names=1)
+
+gl1 = strsplit(gl$Genes, ', ') %>% 'names<-'(gl$Pathway) %>% lapply(toupper)
+
+gl1 = readRDS(paste0(fdir.set,'/toy_example/comm.bl1.list.rds'))
+
+
+# human.ppi.network.csv : test network
+
+
+# GetDistance.r
+# community distance measure, method에서 distance measure 방식 설정
+dist.results <- CommDistFunction(
+                 toy_network,
+                 gl1,
+                 random= 100,
+                 overlap_filtering = TRUE
+                #  method= 'closest'
+                 )
+
+# network=toy_network
+# community.genelist = comm.genelist.final
+
+summary(dist.results)
+class(dist.results)
+
+dist.results@MoBCresults %>% dplyr::arrange(z_score)
+
+re1 = MoBC.genes(dist.results, 'TP53','Cell Cycle')
+
 head(re1)
-re3 = Get.Centrality(dist.results, 'cancer_2','cancer_8')
-re3$gene_name = fgid1[match(rownames(re3), fgid1$EntrezID),'gene_name']
-head(re3)
+
+dm = dist.results@MoBCresults
+
+rel = lapply(1:nrow(dm),function(vv){
+    v1 = dm[vv,1]
+    v2 = dm[vv,2]
+
+    re1 = MoBC.genes(dist.results, v1,v2)
+    re1$comm1 = v1
+    re1$comm2 = v2
+    re1$rank = rank(-re1$score)
+    return(re1)
+})
+
+lapply(rel, head)
+rel = lapply(rel, function(xx) subset(xx, gene=='STAT3'))
+rel = do.call(rbind, rel)
 
 
+re1 = MoBC.genes(dist.results, '1','2')
+
+rel %>% dplyr::arrange(rank)
+
+
+p1 = plot.MoBC.genes(dist.results,  community1.name='1', community2.name='2', 
+            top=10, community1.color = 'lightpink',community2.color = 'lightblue1')
+
+p2 = plot.Dist(dist.results)
+
+list.files('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/')
+
+png(
+	file='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package/toy_plot/comm1_5_plotMOBC.png',
+	width = 17, height =17, units = "in", res = 300,  bg='white')
+
+plot.MoBC.genes(dist.results,  community1.name='1', community2.name='5', 
+            top=10, community1.color = 'lightpink',community2.color = 'lightblue1')
+
+dev.off()
+
+
+
+png(
+	file='/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Package/toy_plot/distMOBC.png',
+	width = 5, height =10, type='cairo', units = "in", res = 300,  bg='transparent')
+plot.Dist(dist.results)
+
+dev.off()
+
+
+# g = dist.results@graph
+# community1 = dist.results@filtered.communities[['1']]
+# community2 = dist.results@filtered.communities[['2']]
+
+# community1.name = '1'
+# community2.name = '2'
 
