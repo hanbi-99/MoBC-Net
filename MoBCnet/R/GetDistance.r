@@ -40,7 +40,9 @@ CommDistFunction <- function(network,
     } else {
         stop('Method function is wrong. Check the method function', call.=FALSE)
     }
-
+	if (is.null(names(community.genelist)) | any(is.na(names(community.genelist)))) {
+		stop('Please assign names to the community list.', call.=FALSE)
+	}
 	g.res  <- preprocessedNetwork(network)
     comm.genelist <- CommunityGenelist(community.genelist, g.res, overlap_filtering = overlap_filtering)
 	distm <- igraph::distances(g.res, igraph::V(g.res), igraph::V(g.res))
@@ -84,7 +86,7 @@ CommDistFunction <- function(network,
 			zval = (xval-mean(comm.distance.list))/sd(comm.distance.list)
 			pval = sum(comm.distance.list<xval)/random
 
-			df1 = data.frame(community_1=names(comm.genelist)[m], community_2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
+			df1 = data.frame(Module1=names(comm.genelist)[m], Module2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
 			# cat('-end\n')
 			return(df1)
 			})
