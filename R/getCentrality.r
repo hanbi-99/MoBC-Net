@@ -627,7 +627,7 @@ MoBC.genes.p <- function(MoBC.result, community1.name, community2.name,random=10
 
 
 
-MoBC.genes.plot <- function(MoBC.result, module1.name, module2.name, 
+plotMoBC_genes <- function(MoBC.result, module1.name, module2.name, 
                     top=10, module1.color='lightblue1',module2.color='lightpink'){
 	if(!is(MoBC.result, 'MoBCresult')){
 		stop("input should be MoBC class", call. = FALSE)
@@ -695,7 +695,7 @@ MoBC.genes.plot <- function(MoBC.result, module1.name, module2.name,
 
 
 
-Dist.plot <- function(MoBC.result, pval=0.05){
+plotDist <- function(MoBC.result, pval=0.05){
 	if(!is(MoBC.result, 'MoBCresult')){
 		stop("input should be MoBC class", call. = FALSE)
 	}
