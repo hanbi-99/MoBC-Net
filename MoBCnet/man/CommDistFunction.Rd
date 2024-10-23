@@ -2,38 +2,37 @@
 % Please edit documentation in R/GetDistance.r
 \name{CommDistFunction}
 \alias{CommDistFunction}
-\title{Community distance function}
+\title{module distance function}
 \usage{
 CommDistFunction(
   network,
-  community.genelist,
-  hist.bin,
+  module.genelist,
   random = 1000,
   overlap_filtering = TRUE,
+  ratio = 0.1,
+  show.binning = FALSE,
   method = c("closest", "shortest", "kernel", "centre", "separation")
 )
 }
 \arguments{
-\item{network}{input}
+\item{network}{network dataframe}
 
-\item{community.genelist}{input}
+\item{module.genelist}{module genes list}
 
-\item{hist.bin}{input}
+\item{random}{the number of random network formation and distance calculation}
 
-\item{random}{input}
+\item{overlap_filtering}{overlap genes filtering (TRUE/FALSE)}
 
-\item{overlap_filtering}{input}
-
-\item{method}{input}
+\item{method}{distance measuring method}
 }
 \value{
-distance results, community.genelist, network
+distance results, module.genelist, network
 }
 \description{
 Calculate the distance and z_score of the communities
 use.f can be choosed in the DistFunction.r
 ex) get.shortest.dist, get.kernel.dist, get.centre.dist, get.separation.dist, get.closest.dist
 As a default, get.closest.dist function is used to measure the distance between communities
-User also can make the dist function and use it for calculating community distance
+User also can make the dist function and use it for calculating module distance
 This function is made to know the z-score of a measured distance from distances of degree-preserved random networks
 }

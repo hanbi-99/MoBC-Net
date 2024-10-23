@@ -37,14 +37,15 @@ if(user.id=='hanbilee'){
 load('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/논문_RECOMB/result file/breast.comm.dist.RData')
 
 # mobc.genes.results(link gene 결과)
-# comm.dist.result(distance 결과), 
+# comm.dist.result(distance 결과),
 
 # mobc.res - mobc results
 # res2 - disntace results
 #  res2.sd (Deseq 결과), allid(ginfo), deseq.deg(Deseq deg 결과), pathway.go, pathway.kegg, comm.dist.result(distance 결과), 
 # human.ppi.network.final(전체 ppi network), deg.network(deg network), comm.breast(comm list), mobc.genes.results(link gene 결과)
 
-
+# load('/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/논문_RECOMB/result file/breast.deg.results.700.sd.4.raw.RData')
+# # breast.deg.results.700.sd.4
 
 #--------------- load
 # new
@@ -65,7 +66,8 @@ col.key = c('black','orange','dodgerblue','red','forestgreen','lightpink','light
 cls = comm.breast
 graph = res2@graph
 
-
+head(mobc.rel[['M2-M3']])
+head(mobc.rel[['M2-M5']])
 
 #---------- all
 
@@ -260,8 +262,200 @@ dev.off()
 
 
 
+#---------------------- pval
+# subgraph
+
+# cal.MoBCgenes.p
+# score.df
 
 
+
+#-----------------
+# shortest-based
+resm1 = res2m
+f.recomb = '/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/논문_RECOMB/result file'
+
+#-----------------
+ixix = 1
+cm1 = resm1[ixix,c('community_1')]
+cm2 = resm1[ixix,c('community_2')]
+fc.res = cal.FCgene(res2@graph, 
+            community1=cls[[cm1]], 
+            community2=cls[[cm2]])
+fc.res$community1 = cm1
+fc.res$community2 = cm2
+fc.res$rank = rank(-fc.res$score)
+
+head(fc.res)
+
+mobc.res = cal.MoBCgenes.p(res2@graph, 
+            community1=cls[[cm1]], 
+            community2=cls[[cm2]],
+            random = 1000, ratio=0.1, cal.p = FALSE)
+mobc.res$rank = rank(-mobc.res$score)
+
+
+candig = c(subset(fc.res, rank <=5)$gene, subset(mobc.res, rank <=5)$gene) %>%unique
+all.df = data.frame(gene=candig, 
+            mobc.score = round(mobc.res[match(candig, mobc.res$gene),'score'],3),
+            mobc.rank = as.integer(mobc.res[match(candig, mobc.res$gene),'rank']),
+            fc.score = round(fc.res[match(candig, fc.res$gene),'score'],3),
+            fc.rank = fc.res[match(candig, fc.res$gene),'rank'])
+
+
+
+write.csv(all.df, row.names=F, file=paste0(f.recomb,'/res_M',cm1,'_M',cm2,'.csv'))
+
+
+
+# save(res2, fc.res, mobc.res, 
+#     file=paste0(plt.dir,'/res_M',cm1,'_M',cm2,'.Rdata'))
+
+
+#-----------------
+ixix = 2
+cm1 = resm1[ixix,c('community_1')]
+cm2 = resm1[ixix,c('community_2')]
+fc.res = cal.FCgene(res2@graph, 
+            community1=cls[[cm1]], 
+            community2=cls[[cm2]])
+fc.res$community1 = cm1
+fc.res$community2 = cm2
+fc.res$rank = rank(-fc.res$score)
+
+head(fc.res)
+
+mobc.res = cal.MoBCgenes.p(res2@graph, 
+            community1=cls[[cm1]], 
+            community2=cls[[cm2]],
+            random = 1000, ratio=0.1, cal.p=FALSE)
+mobc.res$rank = rank(-mobc.res$score)
+
+
+candig = c(subset(fc.res, rank <=5)$gene, subset(mobc.res, rank <=5)$gene) %>%unique
+all.df = data.frame(gene=candig, 
+            mobc.score = round(mobc.res[match(candig, mobc.res$gene),'score'],3),
+            mobc.rank = as.integer(mobc.res[match(candig, mobc.res$gene),'rank']),
+            fc.score = round(fc.res[match(candig, fc.res$gene),'score'],3),
+            fc.rank = fc.res[match(candig, fc.res$gene),'rank'])
+
+
+
+
+write.csv(all.df, row.names=F, file=paste0(f.recomb,'/res_M',cm1,'_M',cm2,'.csv'))
+
+# save(res2, fc.res, mobc.res, 
+#     file=paste0(plt.dir,'/res_M',cm1,'_M',cm2,'.Rdata'))
+
+
+
+
+
+
+
+#--- candig
+candig = c(subset(fc.res, rank <=20)$gene, subset(mobc.res, rank <=20)$gene) %>%unique
+all.df = data.frame(gene=candig, 
+            mobc.score = mobc.res[match(candig, mobc.res$gene),'score'],
+            mobc.rank = as.integer(mobc.res[match(candig, mobc.res$gene),'rank']),
+            fc.score = fc.res[match(candig, fc.res$gene),'score'],
+            fc.rank = fc.res[match(candig, fc.res$gene),'rank'])
+
+
+
+
+
+#---------------------- link gnene (2,3)
+# subgraph
+
+candig = c(subset(fc.res, rank <=5)$gene, subset(mobc.res, rank <=5)$gene) %>%unique
+all.df = data.frame(gene=candig, 
+            mobc.score = mobc.res[match(candig, mobc.res$gene),'score'],
+            mobc.rank = as.integer(mobc.res[match(candig, mobc.res$gene),'rank']),
+            fc.score = fc.res[match(candig, fc.res$gene),'score'],
+            fc.rank = fc.res[match(candig, fc.res$gene),'rank'])
+
+
+all.df
+
+top = 5
+sig.re = res2m #subset(res2m, pvalue < 0.05)
+
+ixix = 2
+
+key.module = c(sig.re[ixix,1], sig.re[ixix,2])
+useg = unlist(cls[key.module])
+useg = c(useg, candig)
+
+
+g2 = igraph::induced_subgraph(graph, useg)
+
+setdiff(useg, igraph::V(g2)$name)
+
+
+vcolor = rep(adjustcolor('grey80', 1), length(igraph::V(g2)$name))
+for( ii in names(col.key)) vcolor[igraph::V(g2)$name %in% cls[[ii]]] = col.key[ii]
+
+
+tcolor = rep(NA, length(igraph::V(g2)$name))
+tcolor[igraph::V(g2)$name %in% candig] = 'white'
+
+tfv = igraph::V(g2)$name %in% candig
+names(tfv) = V(g2)$name
+
+labels = V(g2)$name
+labels[!tfv] = ''
+
+border.col = rep('white', length(V(g2)$name)) %>% 'names<-'(V(g2)$name)
+border.col[subset(all.df, mobc.rank <=5)$gene] = 'red'
+border.col[subset(all.df, fc.rank <=5)$gene] = 'blue'
+border.col[subset(all.df, fc.rank <=5 & mobc.rank<=5)$gene] = 'black'
+
+
+plt.dir = '/Users/hanbilee/Library/CloudStorage/OneDrive-GCCORP/문서 - AI & BI 연구팀 - Community distance/Community distance/Validation data results/plot'
+png(
+	# file = paste0(plt.dir,"/comm_2_3_5_linkers_update.png"),
+	file = paste0(plt.dir,"/comm_",paste0(sort(key.module),collapse='_'),"_candig.png"),
+	width = 8, height =8, 
+    # type='cairo', 
+    units = "in", res = 300,  bg='white')
+
+# wv = lapply(igraph::E(g2), function(xx))
+# as_edgelist(g2) %>% apply(1, function(xx) )
+
+set.seed(2) #2
+layout <- igraph::layout_with_kk(g2)
+
+plot(g2, 
+    layout = layout, 
+    # mark.groups = split(V(g)$name,clv),
+    # vertex.label = fgid1[match(V(g)$name, fgid1$EntrezID),'gene_name'],
+    vertex.label = labels,
+    vertex.color=vcolor,
+    vertex.frame.width=ifelse(tfv,2,1),
+    vertex.frame.color=border.col, #rep('white', length(tcolor)),#tcolor,#'white',
+    edge.color ='grey', #adjustcolor('black', alpha=0.6),
+    # vertex.size= (cln[V(cl.g2)$name]^0.5)*4,
+    vertex.size=ifelse(tfv, 10,3),
+    # vertex.label.dist=1,
+    vertex.label.family='Arial',
+    # vertex.frame.color = 'grey90',
+    vertex.label.color='black',
+    # vertex.label.font=ifelse(V(g)$name %in% np.gl[[pn]], 2,1),
+    vertex.label.cex = 0.5,
+    edge.width=0.2
+)
+
+legend("topleft", 
+    # col=c('orange','dodgerblue','forestgreen'), pch=19, 
+    # legend=c('M2','M3','M5'))
+    # col=c('lightpink','plum1'), pch=19, 
+    # legend=c('M6','M7'))
+    col=col.key[key.module], pch=19, 
+    legend=paste0('M', key.module))
+
+
+dev.off()
 
 
 

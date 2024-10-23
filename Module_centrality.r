@@ -12,10 +12,10 @@
 # check
 
 CheckInput <-function(dist.result){
-    check.id = c('results','filtered.community','graph')
+    check.id = c('results','filtered.modules','graph')
     name.flag =  all(names(dist.result) %in% check.id)
     list.flag = is.list(dist.result)
-    commg.flag = is.list(dist.result$filtered.community)
+    commg.flag = is.list(dist.result$filtered.modules)
     graph.flag = igraph::is_igraph(dist.result$graph)
 
     if(!(name.flag & list.flag & commg.flag & graph.flag)){
@@ -66,12 +66,12 @@ CalCentrality <- function(g, community1, community2){
 
 Get.Centrality <- function(dist.result, community1.name, community2.name){
     CheckInput(dist.result)
-    if(!all(c(community1.name, community2.name) %in% names(dist.result$filtered.community))){
+    if(!all(c(community1.name, community2.name) %in% names(dist.result$filtered.modules))){
         stop('community name should be included in name of pre-defined community', call. = FALSE)
     }
     CalCentrality(dist.result$graph, 
-                    community1=dist.result$filtered.community[[community1.name]], 
-                    community2=dist.result$filtered.community[[community2.name]])
+                    community1=dist.result$filtered.modules[[community1.name]], 
+                    community2=dist.result$filtered.modules[[community2.name]])
 }
 
 
@@ -133,7 +133,7 @@ CalConnecting.gene2comm <- function(g, community1, community2){
 calflag <-function(dist.result, communityn){
     if(communityn %in% igraph::V(dist.result$graph)$name){
         return(1)
-    }else if(communityn %in% names(dist.result$filtered.community)){
+    }else if(communityn %in% names(dist.result$filtered.modules)){
         return(2)
     }else(0)
 }
@@ -150,16 +150,16 @@ Get.ConnectingGene <- function(dist.result, community1.name, community2.name){
 
     if(any(com1.flag==1|com2.flag==1)){
         print('Inferring connecting genes from a gene not a module')
-        if(com1.flag==1) use.set1 = community1.name else use.set1 = dist.result$filtered.community[[community1.name]]
-        if(com2.flag==1) use.set2 = community2.name else use.set2 = dist.result$filtered.community[[community2.name]]
+        if(com1.flag==1) use.set1 = community1.name else use.set1 = dist.result$filtered.modules[[community1.name]]
+        if(com2.flag==1) use.set2 = community2.name else use.set2 = dist.result$filtered.modules[[community2.name]]
         re = CalConnecting.gene2comm(dist.result$graph, 
                         community1=use.set1, 
                         community2=use.set2)
     } else{
         print('Inferring connecting genes between modules')
         re = CalConnecting(dist.result$graph, 
-                        community1= dist.result$filtered.community[[community1.name]], 
-                        community2= dist.result$filtered.community[[community2.name]])
+                        community1= dist.result$filtered.modules[[community1.name]], 
+                        community2= dist.result$filtered.modules[[community2.name]])
 
     }
     return(re)

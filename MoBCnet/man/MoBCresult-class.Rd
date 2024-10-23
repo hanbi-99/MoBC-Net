@@ -14,7 +14,7 @@ This class represents the distance results of communities
 \describe{
 \item{\code{MoBCresult}}{community distance result}
 
-\item{\code{filtered.communities}}{a list of community genes}
+\item{\code{filtered.modules}}{a list of community genes}
 
 \item{\code{graph}}{background network}
 }}

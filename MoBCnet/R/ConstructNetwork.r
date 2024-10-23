@@ -65,7 +65,7 @@ genelist.overlap <- function(genelist, overlap_filtering=TRUE) {
 
 CommunityGenelist <- function(genelist, g, overlap_filtering = TRUE) {
     if (is.null(genelist) | length(genelist) <= 1) {
-        stop('Community genelist is missing.', call. = FALSE)
+        stop('Module list is missing.', call. = FALSE)
     } else if (!is.list(genelist)) {
         stop('Input must be list.', call. = FALSE)
     } else {
@@ -75,9 +75,9 @@ CommunityGenelist <- function(genelist, g, overlap_filtering = TRUE) {
         glist.final <- lapply(genelist, function(xx) intersect(xx, igraph::V(g)$name))
         comm.len <- sum(lengths(glist.final) > 0)
         if (intersect.len == 0 | comm.len == 0) {
-            stop('Network does not include the community genelist. Check the genelist and the network.', call.= FALSE)
+            stop('The input network nodes do not include any component of assigned module. Please check the input module list or the network.', call.= FALSE)
         }       
-        cat(paste0('Community ', intersect.len,' nodes ','(original nodes - ',glist.len, ')', ' are included in the network and the number of community (the number of nodes > 0) is ', comm.len, '\n'))
+        cat(paste0('Module ', intersect.len,' nodes ','(original nodes - ',glist.len, ')', ' are included in the network and the number of module (the number of nodes > 0) is ', comm.len, '\n'))
         return(glist.final)
     }
 }

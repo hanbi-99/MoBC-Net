@@ -7,10 +7,10 @@
 preprocessedNetwork(dataframe)
 }
 \arguments{
-\item{dataframe}{input}
+\item{dataframe}{network dataframe input}
 }
 \value{
-largest component netowrk
+largest component netowork
 }
 \description{
 Background network constitution

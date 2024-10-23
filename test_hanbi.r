@@ -21,6 +21,7 @@ use_mit_license("Testname")
 use_package("igraph", 'imports')
 use_package("magrittr",'imports')
 use_package("circlize",'imports')
+use_package("colorspace",'imports')
 
 
 # Set up other files -------------------------------------------------

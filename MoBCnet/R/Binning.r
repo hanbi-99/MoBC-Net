@@ -113,20 +113,20 @@ comb = function(n, x) {
     exp(lfactorial(n) - lfactorial(n-x) - lfactorial(x))
 }
 
-hist.bin.function.v2 <- function(g.res,community.gl,random.n,ratio) {
+hist.bin.function.v2 <- function(g.res,community.gl,random,ratio,show.binning) {
     
-    cut.random = random.n*ratio
+    cut.random = random*ratio
     d.all = igraph::degree(g.res)
     d.all.tab = table(d.all)
 
 
     # d.all.l = split(names(d.all), d.all)
-    d.deg = d.all[unlist(community.gl)]
+    d.deg = d.all[unique(unlist(community.gl))]
     d.deg.tab = table(d.deg)
     # d.deg.l = split(names(d.deg), d.deg)
 
-    all.ddf = data.frame(degree=as.numeric(names(d.all.tab)), n=as.numeric(d.all.tab)) %>% arrange(-degree)
-    deg.ddf = data.frame(degree=as.numeric(names(d.deg.tab)), n=as.numeric(d.deg.tab)) %>% arrange(-degree)
+    all.ddf = data.frame(degree=as.numeric(names(d.all.tab)), n=as.numeric(d.all.tab)) %>% dplyr::arrange(-degree)
+    deg.ddf = data.frame(degree=as.numeric(names(d.deg.tab)), n=as.numeric(d.deg.tab)) %>% dplyr::arrange(-degree)
     maxv = max(all.ddf$degree)
     cutoffl = c(maxv)
     for(ii in c(deg.ddf$degree,0)){
@@ -135,7 +135,7 @@ hist.bin.function.v2 <- function(g.res,community.gl,random.n,ratio) {
         deg.n = subset(deg.ddf, degree > ii & degree <= maxv)$n %>% sum
         if(comb(all.n, deg.n)>=cut.random){
             cutoffl = c(cutoffl, ii)
-            cat('cut ',ii,' : ',ii,'< degree <=',maxv,' : allN ',all.n,", degN ",deg.n," --> ", comb(all.n, deg.n),'\n')
+            if(show.binning) cat('cut ',ii,' : ',ii,'< degree <=',maxv,' : allN ',all.n,", degN ",deg.n," --> ", comb(all.n, deg.n),'\n')
             maxv = ii
         } else if(ii==0){
             cutoffl[length(cutoffl)] = 0

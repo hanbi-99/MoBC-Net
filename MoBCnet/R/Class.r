@@ -6,7 +6,7 @@
 #' @name MoBCresult-class
 #' @docType class
 #' @slot MoBCresult community distance result
-#' @slot filtered.communities a list of community genes
+#' @slot filtered.modules a list of community genes
 #' @slot graph background network
 #' @exportClass MoBCresult
 
@@ -18,7 +18,7 @@ setOldClass("igraph")
 setClass("MoBCresult",
         representation = representation(
             MoBCresults = "data.frame",
-            filtered.communities = "list",
+            filtered.modules = "list",
             graph = "igraph"
             )
          )
