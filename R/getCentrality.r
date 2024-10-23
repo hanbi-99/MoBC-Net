@@ -357,10 +357,9 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
 # ratio = 0.1
 
 
-
 cal.MoBC.random <- function(g, community1, community2,random,ratio,show.binning){
 
-    hist.bin = hist.bin.function.v2(g, c(community1, community2),random,ratio, show.binning)
+    hist.bin = hist.bin.function.v2(g.res=g, community.gl=c(community1, community2),random=random,ratio=ratio, show.binning=FALSE)
     allg = igraph::V(g)$name %>% as.character()
 
     cl1g = community1
@@ -577,35 +576,35 @@ MoBC.genes <- function(MoBC.result, module1.name, module2.name,random,ratio,cal.
 
 
 
-#' Calculate centrality between two modules from MoBC result 
-#' 
-#' 
-#' @title Get.Centrality
-#' @param MoBC.result results from CommDistFunction function
-#' @param community1.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
-#' @param community2.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
-#' @returns data.frame
-#' @export
-#' @examples
-#' Get.Centrality(MoBC.result, 'community_1','community_2')
+# #' Calculate centrality between two modules from MoBC result 
+# #' 
+# #' 
+# #' @title Get.Centrality
+# #' @param MoBC.result results from CommDistFunction function
+# #' @param community1.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
+# #' @param community2.name The name of the community for which centrality is being calculated. This should be one of the communities provided as input
+# #' @returns data.frame
+# #' @export
+# #' @examples
+# #' Get.Centrality(MoBC.result, 'community_1','community_2')
 
 
-MoBC.genes.p <- function(MoBC.result, community1.name, community2.name,random=1000,ratio=0.1){
-	if(!is(MoBC.result, 'MoBCresult')){
-		stop("input should be MoBC class", call. = FALSE)
-	}
-	communities = MoBC.result@filtered.modules
+# MoBC.genes.p <- function(MoBC.result, community1.name, community2.name,random=1000,ratio=0.1){
+# 	if(!is(MoBC.result, 'MoBCresult')){
+# 		stop("input should be MoBC class", call. = FALSE)
+# 	}
+# 	communities = MoBC.result@filtered.modules
 
-	if(!all(c(community1.name, community2.name) %in% names(communities))){
-		stop('community name should be included in name of pre-defined community', call. = FALSE)
-	}
+# 	if(!all(c(community1.name, community2.name) %in% names(communities))){
+# 		stop('community name should be included in name of pre-defined community', call. = FALSE)
+# 	}
 
-	cal.MoBCgenes.p(MoBC.result@graph, 
-					Module1=MoBC.result@filtered.modules[[community1.name]], 
-					Module2=MoBC.result@filtered.modules[[community2.name]],
-                    random=random,
-                    ratio = ratio)
-}
+# 	cal.MoBCgenes.p(MoBC.result@graph, 
+# 					Module1=MoBC.result@filtered.modules[[community1.name]], 
+# 					Module2=MoBC.result@filtered.modules[[community2.name]],
+#                     random=random,
+#                     ratio = ratio)
+# }
 
 
 
