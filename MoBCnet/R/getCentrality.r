@@ -353,6 +353,45 @@ cal.MoBCgenes <- function(g, community1, community2){
 
 
 
+
+
+
+
+cal.FCgene <- function(g, community1, community2){
+
+    gene.ix = igraph::V(g)$name
+
+    # re = igraph::all_shortest_paths(g, community1[1:3],community2[1:4])
+    # lapply(re$res, function(xx) names(xx)[1] ) %>% unlist %>% unique
+    # lapply(re$res, function(xx) names(xx)[length(xx)] ) %>% unlist %>% unique
+    
+    re = sapply(community1, function(g1){
+            
+        edges = igraph::all_shortest_paths(g, g1, community2)
+        end.ix = edges$res %>% sapply(function(xx) names(xx)[length(xx)])
+        end.ix = split(1:length(end.ix), end.ix)
+        resl = lapply(end.ix, function(ixix){
+            intg = edges$res[ixix] %>% lapply(function(xx) setdiff(names(xx), names(xx)[c(1,length(xx))]))
+            intg.tab = unlist(intg) %>% table
+            intg.tab = intg.tab/length(intg)
+            intg.tab[gene.ix] %>% 'names<-'(gene.ix)
+        })
+        res = do.call(rbind, resl) %>% as.matrix
+        res[is.na(res)] = 0
+        resv = apply(res,2,sum)
+    })
+    re1 = apply(re,1,sum)
+    re1 = re1/length(community1)/length(community2)
+
+	score.df = data.frame(gene=gene.ix,score=re1[gene.ix])
+    score.df$node_type = 'link'
+	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
+	score.df = score.df %>% dplyr::arrange(-score)
+
+	return(score.df)
+}
+
+
 #' Calculate centrality between two modules from MoBC result 
 #' 
 #' 
@@ -377,8 +416,8 @@ MoBC.genes <- function(MoBC.result, community1.name, community2.name){
 	}
 
 	cal.MoBCgenes(MoBC.result@graph, 
-					community1=MoBC.result@filtered.communities[[community1.name]], 
-					community2=MoBC.result@filtered.communities[[community2.name]])
+					Module1=MoBC.result@filtered.communities[[community1.name]], 
+					Module2=MoBC.result@filtered.communities[[community2.name]])
 }
 
 
@@ -480,15 +519,11 @@ plot.Dist <- function(MoBC.result, pval=0.05){
 	ntkg = igraph::simplify(ntkg, remove.multiple = TRUE, remove.loops = TRUE)
 
     maxn = max(lengths(MoBC.result@filtered.communities))
-    col_fun = circlize::colorRamp2(c(0, round(maxn/4),round(maxn/4)*2,round(maxn/4)*3,maxn), c("grey", "orange", "#FF6566","red","darkred"))
-    colv = sapply(igraph::V(ntkg)$name, function(gn){
-        xx = col_fun(length(MoBC.result@filtered.communities[[gn]])) %>% c
-        return(xx)
-    }) %>% 'names<-'(igraph::V(ntkg)$name)
+    comm.col = colorspace::sequential_hcl(length(MoBC.result@filtered.communities), "Terrain") %>% 'names<-'(names(MoBC.result@filtered.communities))
     
     commn = lengths(MoBC.result@filtered.communities)[igraph::V(ntkg)$name]
     sizev = (commn-min(commn))/(max(commn)-min(commn))
-    sizev = sizev*20+50
+    sizev = sizev*20+20
 
 	layout <- igraph::layout_with_fr(ntkg)
 
@@ -497,7 +532,7 @@ plot.Dist <- function(MoBC.result, pval=0.05){
 		# mark.groups = split(V(g)$name,clv),
 		# vertex.label = fgid1[match(V(g)$name, fgid1$EntrezID),'gene_name'],
 		# vertex.label = '', #vns
-		vertex.color=colv,
+		vertex.color=comm.col[igraph::V(ntkg)$name],
 		vertex.frame.width=0.3,
 		vertex.frame.color='white',
 		edge.color ="grey",#adjustcolor('black', alpha=0.6),
@@ -508,11 +543,11 @@ plot.Dist <- function(MoBC.result, pval=0.05){
 		vertex.label.color='black',
 		# vertex.label.font=ifelse(V(g)$name %in% np.gl[[pn]], 2,1),
 		vertex.label.size = 0.1,
-		edge.width=(rank(-igraph::E(ntkg)$weight))
+		edge.width=(rank(igraph::E(ntkg)$weight))
 	)
     df1 = data.frame(n = lengths(MoBC.result@filtered.communities)[igraph::V(ntkg)$name], col=colv) %>% unique
     df1 = df1[order(df1$n, decreasing=T),]
-    legend("bottomright", col=df1[,2], pch=19, legend=df1[,1], title='Module size')
+    legend("bottomright", col=comm.col, pch=19, legend=names(comm.col), title='Module')
 }
 
 
