@@ -512,6 +512,20 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
 
 
 
+#' Calculate centrality between two modules from MoBC result 
+#' 
+#' 
+#' @title cal.FCgene
+#' @param g graph
+#' @param module1.name The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @param module2.name The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @returns data.frame
+#' @export
+#' @examples
+#' cal.FCgene(graph, 'module_1','module_2')
+
+
+
 
 cal.FCgene <- function(g, community1, community2){
 
@@ -541,7 +555,7 @@ cal.FCgene <- function(g, community1, community2){
 
 	score.df = data.frame(gene=gene.ix,score=re1[gene.ix])
     score.df$node_type = 'link'
-	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
+	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'module genes'
 	score.df = score.df %>% dplyr::arrange(-score)
 
 	return(score.df)
