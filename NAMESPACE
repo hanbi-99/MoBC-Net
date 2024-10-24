@@ -3,6 +3,7 @@
 export(CommDistFunction)
 export(CommunityGenelist)
 export(MoBC.genes)
+export(cal.FCgene)
 export(comb.orig)
 export(genelist.overlap)
 export(get.centre.dist)
