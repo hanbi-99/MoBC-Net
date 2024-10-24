@@ -440,6 +440,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
 	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
 	score.df = score.df %>% dplyr::arrange(-score)
 
+    colix = c('gene','score','node_type')
 
     if(cal.p){
         random.mat = cal.MoBC.random(g, community1, community2,random,ratio,show.binning=FALSE)
@@ -448,8 +449,10 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
             pval = sum(random.mat[gn,]>xval)/random
         })
         score.df$pval = pval
+        colix = c('gene','score','node_type','pval')
+
     }
-	return(score.df[,c('gene','score','node_type')])
+	return(score.df[,colix])
 }
 
 
