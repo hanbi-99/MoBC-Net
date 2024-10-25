@@ -45,7 +45,7 @@ link.gene.res %>% head
 plotMoBC_genes(MoBC.result=mobc.res, module1.name='M2', module2.name='M3', 
                     top=5, module1.color='lightblue1',module2.color='lightpink')
 
-plotDist(MoBC.result <- mobc.res, pval=0.005)
+plotDist(MoBC.result=mobc.res, pval=0.005)
 
 
 ```
