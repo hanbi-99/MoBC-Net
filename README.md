@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of MoBCnet is to ...
+The goal of MoBC-Net is designed to quantify the distance between distinct modules-of-interest (MOIs) within a network and identify key link nodes using a novel metric termed module-betweenness centrality (MoBC).
 
 ## Installation
 
