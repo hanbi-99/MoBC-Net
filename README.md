@@ -6,9 +6,10 @@
 The goal of MoBC-Net is designed to quantify the distance between distinct modules-of-interest (MOIs) within a network and identify key link nodes using a novel metric termed module-betweenness centrality (MoBC).
 
 <img width="347" alt="image" src="https://github.com/user-attachments/assets/0bcf86aa-eb73-4648-8177-56732a365a13">
-![figure1](https://github.com/user-attachments/assets/467a0240-94f5-4fff-a4de-a873b436af35)
-![figure1](https://github.com/user-attachments/assets/840ab720-7921-44e4-b550-9f106aecafe5)
-![image](https://github.com/user-attachments/assets/a0399b2c-f34c-49e6-90ff-01b21c761f33)
+
+<p align="center">
+  <img src="[your_relative_path_here](https://github.com/user-attachments/assets/467a0240-94f5-4fff-a4de-a873b436af35)" width="350" title="Graphical description of MoBC-Net">
+</p>
 
 ## Installation
 
