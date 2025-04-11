@@ -76,7 +76,8 @@ CommuinityDistance <- function(network,
             membership[names(deg) %in% cl1g] <- 1
             membership[names(deg) %in% cl2g] <- 2 
 
-            options=paste0(c(random,ratio),collapse='_')
+            kk = c(names(comm.genelist)[m],names(comm.genelist)[n]) %>% sort
+            options=paste0(c(kk,random,ratio),collapse='_')
 
             dirn1 = paste0('./MoBCtmp/Dist/',options,'/',names(comm.genelist)[m],'_',randomMethod,'_',random)
             dirn2 = paste0('./MoBCtmp/Dist/',options,'/',names(comm.genelist)[n],'_',randomMethod,'_',random)

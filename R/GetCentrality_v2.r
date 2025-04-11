@@ -90,7 +90,8 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
     cl1f = cl1g %>% sort %>% paste0(collapse='_')
     cl2f = cl2g %>% sort %>% paste0(collapse='_')
 
-    options=paste0(c(random,ratio),collapse='_')
+    kk = c(cl1f,cl2f) %>% sort
+    options=paste0(c(kk,random,ratio),collapse='_')
 
     dirn1 = paste0('./MoBCtmp/MoBC/',options,'/',cl1f,'/',cal.p,'_',random)
     dirn2 = paste0('./MoBCtmp/MoBC/',options,'/',cl2f,'/',cal.p,'_',random)
