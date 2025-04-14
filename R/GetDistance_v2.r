@@ -26,7 +26,6 @@ CommuinityDistance <- function(network,
                              method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
     # cat(method,'\n')
     overlap_filtering=TRUE
-    hist.bin0=c()
     if (is.character(method)){
         dist.function <- match.arg(method)
         # cat(dist.function,'\n')
@@ -63,12 +62,12 @@ CommuinityDistance <- function(network,
     cat('Dist matrix :', dim(distm)[1],'X',dim(distm)[2], 'is made','\n')
     cat('Random distance measuring is going to be processed by', random, 'times','\n')
 
-
+    binl = list()
     # m=1, n=2
 	results = lapply(1:(length(comm.genelist)-1), function(m){
 		 dist.rel =lapply((m+1):length(comm.genelist), function(n){ #dist.rel =
 			cat('Distance measuring :','module',names(comm.genelist)[m],' - ','module', names(comm.genelist)[n],'\n')
-
+            idv = paste0(m,'_',n)
             cl1g = comm.genelist[[m]]
 			cl2g = comm.genelist[[n]]
 
@@ -114,7 +113,7 @@ CommuinityDistance <- function(network,
             cat(paste0("You don't have tmp files for random sampling - ",randomMethod,". Generating random samples will take time...  \n"))
             dir.create(dirn1, recursive=TRUE,showWarnings = FALSE)
             dir.create(dirn2, recursive=TRUE,showWarnings = FALSE)
-
+            
             if(randomMethod=='random1'){
                 
                 comm.distance.list = sapply(1:random, function(j){
@@ -127,6 +126,7 @@ CommuinityDistance <- function(network,
 
             } else if(randomMethod=='random2'){
                 hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random)
+                binl[[idv]] = hist.bin0
                 hist.bin = hist.bin0$node_bag
                 names(hist.bin) = 1:length(hist.bin)
                 comm.distance.list = sapply(1:random, function(j){
@@ -154,6 +154,7 @@ CommuinityDistance <- function(network,
                 S <- igraph::distances(g.res, algorithm = "unweighted")
                 pb <- progress::progress_bar$new(total = random)
                 re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
+                binl[[idv]] = re
                 comm.distance.list = c()
                 for(j in 1:random){
                     rsamplel = modularity_sampling(re, deg, membership, S)     
@@ -221,7 +222,7 @@ CommuinityDistance <- function(network,
         distance = results,
         filtered.modules = comm.genelist,
         graph = g.res)
-    if(!is.null(hist.bin0)) x$bag = hist.bin0
+    if(!is.null(hist.bin0)) x$bag = binl
 	# x <- new("MoBCresult",
     #     MoBCresults = results,
     #     filtered.modules = comm.genelist,
