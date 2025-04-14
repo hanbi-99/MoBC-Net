@@ -107,6 +107,8 @@ CommuinityDistance <- function(network,
                 pval = sum(comm.distance.list<xval)/random
 
                 df1 = data.frame(Module1=names(comm.genelist)[m], Module2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
+                pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
+                df1$p.adj = p.adjust(pv,'BH')
                 return(df1)
             }
 
@@ -222,7 +224,7 @@ CommuinityDistance <- function(network,
         distance = results,
         filtered.modules = comm.genelist,
         graph = g.res)
-    if(!is.null(hist.bin0)) x$bag = binl
+    if(!is.null(binl)) x$bag = binl
 	# x <- new("MoBCresult",
     #     MoBCresults = results,
     #     filtered.modules = comm.genelist,
