@@ -227,15 +227,16 @@ CommuinityDistance <- function(network,
         filtered.modules = comm.genelist,
         graph = g.res)
 
-    for(m in 1:(length(comm.genelist)-1){
-		for(n in (m+1):length(comm.genelist))
+    for(m in 1:(length(comm.genelist)-1)){
+		for(n in (m+1):length(comm.genelist)){
             idv = paste0(m,'_',n)
             kk = c(names(comm.genelist)[m],names(comm.genelist)[n]) %>% sort
             options=paste0(c(kk,random,ratio),collapse='_')
             fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_',randomMethod,'.RDS')
             re = readRDS(fn1)
             binl[[idv]] = re
-        })
+        }
+    }
 
     x$bag = binl
 	# x <- new("MoBCresult",
