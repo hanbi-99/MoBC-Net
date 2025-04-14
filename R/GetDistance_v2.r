@@ -128,7 +128,7 @@ CommuinityDistance <- function(network,
 
             } else if(randomMethod=='random2'){
                 hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random)
-                binl[[idv]] = hist.bin0
+                re = hist.bin0
                 hist.bin = hist.bin0$node_bag
                 names(hist.bin) = 1:length(hist.bin)
                 comm.distance.list = sapply(1:random, function(j){
@@ -156,7 +156,7 @@ CommuinityDistance <- function(network,
                 S <- igraph::distances(g.res, algorithm = "unweighted")
                 pb <- progress::progress_bar$new(total = random)
                 re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
-                binl[[idv]] = re
+
                 comm.distance.list = c()
                 for(j in 1:random){
                     rsamplel = modularity_sampling(re, deg, membership, S)     
@@ -215,6 +215,8 @@ CommuinityDistance <- function(network,
             pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
             df1$p.adj = p.adjust(pv,'BH')
 			# cat('-end\n')
+            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_'randomMethod,'.RDS')
+            saveRDS(re, file=fn1)
 			return(df1)
 			})
 		dist.rel = do.call(rbind, dist.rel)
@@ -224,7 +226,18 @@ CommuinityDistance <- function(network,
         distance = results,
         filtered.modules = comm.genelist,
         graph = g.res)
-    if(!is.null(binl)) x$bag = binl
+
+    for(m in 1:(length(comm.genelist)-1){
+		for(n in (m+1):length(comm.genelist))
+            idv = paste0(m,'_',n)
+            kk = c(names(comm.genelist)[m],names(comm.genelist)[n]) %>% sort
+            options=paste0(c(kk,random,ratio),collapse='_')
+            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_'randomMethod,'.RDS')
+            re = readRDS(fn1)
+            binl[[idv]] = re
+        })
+
+    x$bag = binl
 	# x <- new("MoBCresult",
     #     MoBCresults = results,
     #     filtered.modules = comm.genelist,
