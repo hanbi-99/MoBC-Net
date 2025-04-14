@@ -215,7 +215,7 @@ CommuinityDistance <- function(network,
             pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
             df1$p.adj = p.adjust(pv,'BH')
 			# cat('-end\n')
-            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_'randomMethod,'.RDS')
+            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_',randomMethod,'.RDS')
             saveRDS(re, file=fn1)
 			return(df1)
 			})
@@ -232,7 +232,7 @@ CommuinityDistance <- function(network,
             idv = paste0(m,'_',n)
             kk = c(names(comm.genelist)[m],names(comm.genelist)[n]) %>% sort
             options=paste0(c(kk,random,ratio),collapse='_')
-            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_'randomMethod,'.RDS')
+            fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_',randomMethod,'.RDS')
             re = readRDS(fn1)
             binl[[idv]] = re
         })
