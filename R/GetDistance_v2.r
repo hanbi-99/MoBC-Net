@@ -26,6 +26,7 @@ CommuinityDistance <- function(network,
                              method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
     # cat(method,'\n')
     overlap_filtering=TRUE
+    hist.bin0=c()
     if (is.character(method)){
         dist.function <- match.arg(method)
         # cat(dist.function,'\n')
@@ -220,6 +221,7 @@ CommuinityDistance <- function(network,
         distance = results,
         filtered.modules = comm.genelist,
         graph = g.res)
+    if(!is.null(hist.bin0)) x$bag = hist.bin0
 	# x <- new("MoBCresult",
     #     MoBCresults = results,
     #     filtered.modules = comm.genelist,
