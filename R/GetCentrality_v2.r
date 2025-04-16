@@ -115,7 +115,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             rs2 = read.csv(paste0(dirn2,'/rand',j,'.csv'))[,1]
             comm.distance = cal.MoBCgenes.values(g, rs1,rs2, allg) 
             return(comm.distance)
-        }) %>% unlist
+        }) %>% 'rownames<-'(allg)
         return(comm.distance.list)
     }
 
@@ -136,7 +136,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             pb$tick()
             # comm.distance = cal.MoBCgenes.values(g, igraph::V(g)$name[rsamplel[[1]]], igraph::V(g)$name[rsamplel[[2]]], allg)  # same for using index, name 
             return(comm.distance)
-        }) %>% unlist
+        }) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random2'){
         hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random)
@@ -163,7 +163,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             comm.distance = cal.MoBCgenes.values(g, cl1g.random, cl2g.random, allg) 
             pb$tick()
             return(comm.distance)
-        }) %>% unlist
+        }) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random4'){
         S <- igraph::distances(g, algorithm = "unweighted")
@@ -175,9 +175,10 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)      
             comm.distance = cal.MoBCgenes.values(g, rsamplel[[1]], rsamplel[[2]], allg) 
-            comm.distance.list = c(comm.distance.list,comm.distance)
+            comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
             pb$tick()
         }
+        rownames(comm.distance.list) = allg
 
     } else if(cal.p=='random3'){
         cat('Select randomization3 method')
@@ -207,10 +208,11 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             write.csv(Urand,paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(Wrand,paste0(dirn2,'/rand',j,'.csv'), row.names=F)   
             comm.distance = cal.MoBCgenes.values(g, Urand, Wrand, allg) 
+            comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
 
-            comm.distance.list = c(comm.distance.list,comm.distance)
             pb$tick()
         }
+        rownames(comm.distance.list) = allg
 
     } else {
         stop('Please enter the right method for randomization.', call.=FALSE)
