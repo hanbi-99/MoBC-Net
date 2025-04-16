@@ -88,7 +88,9 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
     use.random = cal.p
 
     cl1f = cl1g %>% sort %>% paste0(collapse='_')
+    cl1f = substr(cl1f,1,30)
     cl2f = cl2g %>% sort %>% paste0(collapse='_')
+    cl2f = substr(cl2f,1,30)
 
     kk = c(cl1f,cl2f) %>% sort
     options=paste0(c(kk,random,ratio),collapse='_')
@@ -164,7 +166,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
         }) %>% unlist
 
     } else if(cal.p=='random4'){
-        S <- igraph::distances(g.res, algorithm = "unweighted")
+        S <- igraph::distances(g, algorithm = "unweighted")
         re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
         pb <- progress::progress_bar$new(total = random)
         comm.distance.list = c()
@@ -179,11 +181,11 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
     } else if(cal.p=='random3'){
         cat('Select randomization3 method')
-        S <- igraph::distances(g.res, algorithm = "unweighted")                                
+        S <- igraph::distances(g, algorithm = "unweighted")                                
         m1 <- length(cl1g)
         n1 <- length(cl2g)
 
-        tnodes <- seq_len(length(igraph::V(g.res)$name)) 
+        tnodes <- seq_len(length(igraph::V(g)$name)) 
 
         # clustermn 함수를 사용해 2개 그룹으로 나눈다고 가정 (사용자 정의 필요)
         # 예) clusterAssignment <- clustermn(S[sind, sind], m, n)
