@@ -74,7 +74,7 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
 # ratio = 0.1
 
 # random part
-cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.binning){
+cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.binning, nCore){
 
     allg = igraph::V(g)$name %>% as.character()
 
@@ -110,12 +110,13 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
     if(dir.flag & l.flag & length.flag){
         cat(paste0('You have tmp files for random sampling - ',cal.p,". We will use these files.\n"))
-        comm.distance.list = sapply(1:random, function(j){
+        comm.distance.list = parallel::mclapply(1:random,mc.cores=nCore, function(j){
             rs1 = read.csv(paste0(dirn1,'/rand',j,'.csv'))[,1]
             rs2 = read.csv(paste0(dirn2,'/rand',j,'.csv'))[,1]
             comm.distance = cal.MoBCgenes.values(g, rs1,rs2, allg) 
             return(comm.distance)
-        }) %>% 'rownames<-'(allg)
+        })
+        comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
         return(comm.distance.list)
     }
 
@@ -127,23 +128,22 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
     # cal.MoBCgenes.values(g, cl1g.random, cl2g.random, allg) 
     if(cal.p=='random1'){
-        pb <- progress::progress_bar$new(total = random)
-        comm.distance.list = sapply(1:random, function(j){
+        # pb <- progress::progress_bar$new(total = random)
+        comm.distance.list = parallel::mclapply(1:random, mc.cores=nCore, function(j){
             rsamplel = simple_sampling(deg, membership,random)                
             write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)
             comm.distance = cal.MoBCgenes.values(g, rsamplel[[1]], rsamplel[[2]], allg) 
-            pb$tick()
-            # comm.distance = cal.MoBCgenes.values(g, igraph::V(g)$name[rsamplel[[1]]], igraph::V(g)$name[rsamplel[[2]]], allg)  # same for using index, name 
             return(comm.distance)
-        }) %>% 'rownames<-'(allg)
+        })
+        comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random2'){
         hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random)
         hist.bin = hist.bin0$node_bag
         names(hist.bin) = 1:length(hist.bin)
-        comm.distance.list = sapply(1:random, function(j){
-            pb <- progress::progress_bar$new(total = random)
+        comm.distance.list = parallel::mclapply(1:random, mc.cores=nCore, function(j){
+            # pb <- progress::progress_bar$new(total = random)
             
             samplingN = sapply(hist.bin, function(xx) sum(names(xx) %in% cl1g)) %>% 'names<-'(names(hist.bin))
             cl1g.random = lapply(names(samplingN), function(xn){
@@ -161,24 +161,27 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             write.csv(cl1g.random,paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(cl2g.random,paste0(dirn2,'/rand',j,'.csv'), row.names=F)
             comm.distance = cal.MoBCgenes.values(g, cl1g.random, cl2g.random, allg) 
-            pb$tick()
+            # pb$tick()
             return(comm.distance)
-        }) %>% 'rownames<-'(allg)
+        })
+        comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random4'){
         S <- igraph::distances(g, algorithm = "unweighted")
         re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
-        pb <- progress::progress_bar$new(total = random)
-        comm.distance.list = c()
-        for(j in 1:random){
+        # pb <- progress::progress_bar$new(total = random)
+        # comm.distance.list = c()
+        # for(j in 1:random){
+        comm.distance.list= parallel::mclapply(1:random, mc.cores=nCore, function(j){
             rsamplel = modularity_sampling(re, deg, membership, S)                
             write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)      
             comm.distance = cal.MoBCgenes.values(g, rsamplel[[1]], rsamplel[[2]], allg) 
-            comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
-            pb$tick()
-        }
-        rownames(comm.distance.list) = allg
+            # comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
+            # pb$tick()
+            return(comm.distance)
+        })
+        comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random3'){
         cat('Select randomization3 method')
@@ -198,9 +201,9 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
         # 하는 방식을 구현해야 합니다.
 
         
-        pb <- progress::progress_bar$new(total = random)
-        comm.distance.list = c()
-        for(j in 1:random){
+        # pb <- progress::progress_bar$new(total = random)
+        # comm.distance.list = c()
+        comm.distance.list= parallel::mclapply(1:random, mc.cores=nCore, function(j){
             sind <- sample(tnodes, m1 + n1, replace = FALSE)
             clusterAssignment <- clustermn(S[sind, sind], m1, n1)
             Urand <- sind[clusterAssignment == 1]
@@ -208,11 +211,11 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
             write.csv(Urand,paste0(dirn1,'/rand',j,'.csv'), row.names=F)
             write.csv(Wrand,paste0(dirn2,'/rand',j,'.csv'), row.names=F)   
             comm.distance = cal.MoBCgenes.values(g, Urand, Wrand, allg) 
-            comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
+            # comm.distance.list = cbind(comm.distance.list,as.matrix(comm.distance))
 
-            pb$tick()
-        }
-        rownames(comm.distance.list) = allg
+            # pb$tick()
+        })
+        comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
 
     } else {
         stop('Please enter the right method for randomization.', call.=FALSE)
@@ -227,7 +230,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
 
 
-cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
+cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
     
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
 	shortestm = igraph::distances(g, community1, community2)
@@ -276,7 +279,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p){
     colix = c('gene','score','node_type')
 
     if(cal.p!='None'){
-        random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE)
+        random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
         pval = sapply(score.df$gene, function(gn){
             xval = score.df[match(gn, score.df$gene),'score']
             pval = sum(random.mat[gn,]>xval)/random
@@ -381,6 +384,7 @@ MoBC.genes <- function(network,
                              module1.gene, module2.gene,
                              randomMethod=c('None','RandC','RandCD','RandCM','RandCDM'),
 							 random = 1000,
+                             nCore=1,
                              ratio = 0.1) {
     overlap_filtering=TRUE
     # cat(method,'\n')
@@ -411,7 +415,7 @@ MoBC.genes <- function(network,
 	x=cal.MoBCgenes(g.res, 
 					community1=comm.genelist[['module1']], 
 					community2=comm.genelist[['module2']],
-                    random=random, ratio=ratio,cal.p=randomMethod)
+                    random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
 	return(x)
 	}
 
