@@ -65,6 +65,16 @@ CommuinityDistance <- function(network,
 
     # 클러스터 초기화
     cl <- parallel::makeCluster(nCore)
+    clusterEvalQ(cl,{
+        library(dplyr)
+        library(igraph)
+    })
+    clusterExport(cl,varlist=c(
+        'dist.function',
+        'modularity_sampling',
+        'simple_sampling',
+        'clustermn'
+    ))
 
     binl = list()
     # m=1, n=2
@@ -99,7 +109,7 @@ CommuinityDistance <- function(network,
             if(dir.flag & l.flag & length.flag){
 
                 cat(paste0('You have tmp files for random sampling - ',randomMethod,". We will use these files.\n"))
-                comm.distance.list = parSapply(cl, 1:random, function(j){
+                comm.distance.list = parallel::parSapply(cl, 1:random, function(j){
                     rs1 = read.csv(paste0(dirn1,'/rand',j,'.csv'))[,1]
                     rs2 = read.csv(paste0(dirn2,'/rand',j,'.csv'))[,1]
                     comm.distance = dist.function(distm, rs1,rs2) 
@@ -122,7 +132,7 @@ CommuinityDistance <- function(network,
             
             if(randomMethod=='random1'){
                 
-                comm.distance.list = parSapply(cl, 1:random, function(j){
+                comm.distance.list = parallel::parSapply(cl, 1:random, function(j){
                     rsamplel = simple_sampling(deg, membership,random)
                     write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
                     write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)
@@ -135,7 +145,7 @@ CommuinityDistance <- function(network,
                 re = hist.bin0
                 hist.bin = hist.bin0$node_bag
                 names(hist.bin) = 1:length(hist.bin)
-                comm.distance.list = parSapply(cl, 1:random, function(j){
+                comm.distance.list = parallel::parSapply(cl, 1:random, function(j){
                     
                     samplingN = sapply(hist.bin, function(xx) sum(names(xx) %in% cl1g)) %>% 'names<-'(names(hist.bin))
                     cl1g.random = lapply(names(samplingN), function(xn){
@@ -161,7 +171,7 @@ CommuinityDistance <- function(network,
                 # pb <- progress::progress_bar$new(total = random)
                 re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
 
-                comm.distance.list = parSapply(cl, 1:random, function(j){
+                comm.distance.list = parallel::parSapply(cl, 1:random, function(j){
                     rsamplel = modularity_sampling(re, deg, membership, S)     
                     write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
                     write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)           
@@ -203,7 +213,7 @@ CommuinityDistance <- function(network,
                 
                 # pb <- progress::progress_bar$new(total = random)
 
-                comm.distance.list = parSapply(cl, 1:random, function(j){
+                comm.distance.list = parallel::parSapply(cl, 1:random, function(j){
                     sind <- sample(tnodes, m1 + n1, replace = FALSE)
                     clusterAssignment <- clustermn(S[sind, sind], m1, n1)
                     Urand <- sind[clusterAssignment == 1]
