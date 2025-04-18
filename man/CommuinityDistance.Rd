@@ -10,6 +10,7 @@ CommuinityDistance(
   randomMethod = c("None", "RandC", "RandCD", "RandCM", "RandCDM"),
   random = 1000,
   ratio = 0.1,
+  nCore = 1,
   method = c("closest", "shortest", "kernel", "centre", "separation")
 )
 }
