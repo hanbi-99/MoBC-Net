@@ -23,6 +23,7 @@ CommuinityDistance <- function(network,
                              randomMethod=c('None','RandC','RandCD','RandCM','RandCDM'),
 							 random = 1000,
                              ratio = 0.1,
+                             nCore=1,
                              method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
     # cat(method,'\n')
     overlap_filtering=TRUE
@@ -62,6 +63,9 @@ CommuinityDistance <- function(network,
     cat('Dist matrix :', dim(distm)[1],'X',dim(distm)[2], 'is made','\n')
     cat('Random distance measuring is going to be processed by', random, 'times','\n')
 
+    # 클러스터 초기화
+    cl <- parallel::makeCluster(nCore)
+
     binl = list()
     # m=1, n=2
 	results = lapply(1:(length(comm.genelist)-1), function(m){
@@ -95,7 +99,7 @@ CommuinityDistance <- function(network,
             if(dir.flag & l.flag & length.flag){
 
                 cat(paste0('You have tmp files for random sampling - ',randomMethod,". We will use these files.\n"))
-                comm.distance.list = sapply(1:random, function(j){
+                comm.distance.list = parSapply(cl, 1:random, function(j){
                     rs1 = read.csv(paste0(dirn1,'/rand',j,'.csv'))[,1]
                     rs2 = read.csv(paste0(dirn2,'/rand',j,'.csv'))[,1]
                     comm.distance = dist.function(distm, rs1,rs2) 
@@ -118,7 +122,7 @@ CommuinityDistance <- function(network,
             
             if(randomMethod=='random1'){
                 
-                comm.distance.list = sapply(1:random, function(j){
+                comm.distance.list = parSapply(cl, 1:random, function(j){
                     rsamplel = simple_sampling(deg, membership,random)
                     write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
                     write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)
@@ -131,7 +135,7 @@ CommuinityDistance <- function(network,
                 re = hist.bin0
                 hist.bin = hist.bin0$node_bag
                 names(hist.bin) = 1:length(hist.bin)
-                comm.distance.list = sapply(1:random, function(j){
+                comm.distance.list = parSapply(cl, 1:random, function(j){
                     
                     samplingN = sapply(hist.bin, function(xx) sum(names(xx) %in% cl1g)) %>% 'names<-'(names(hist.bin))
                     cl1g.random = lapply(names(samplingN), function(xn){
@@ -154,18 +158,26 @@ CommuinityDistance <- function(network,
 
             } else if(randomMethod=='random4'){
                 S <- igraph::distances(g.res, algorithm = "unweighted")
-                pb <- progress::progress_bar$new(total = random)
+                # pb <- progress::progress_bar$new(total = random)
                 re = estimate_deg_bag(deg, membership, ratiov=ratio, ncv = random)
 
-                comm.distance.list = c()
-                for(j in 1:random){
+                comm.distance.list = parSapply(cl, 1:random, function(j){
                     rsamplel = modularity_sampling(re, deg, membership, S)     
                     write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
                     write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)           
                     comm.distance = dist.function(distm, rsamplel[[1]], rsamplel[[2]]) 
-                    comm.distance.list = c(comm.distance.list,comm.distance)
-                    pb$tick()
-                }
+                    return(comm.distance)
+                }) %>% unlist
+
+                # comm.distance.list = c()
+                # for(j in 1:random){
+                #     rsamplel = modularity_sampling(re, deg, membership, S)     
+                #     write.csv(rsamplel[[1]],paste0(dirn1,'/rand',j,'.csv'), row.names=F)
+                #     write.csv(rsamplel[[2]],paste0(dirn2,'/rand',j,'.csv'), row.names=F)           
+                #     comm.distance = dist.function(distm, rsamplel[[1]], rsamplel[[2]]) 
+                #     comm.distance.list = c(comm.distance.list,comm.distance)
+                #     pb$tick()
+                # }
                 # comm.distance.list = sapply(1:random, function(j){
                 #     rsamplel = modularity_sampling(deg, membership, S, random)                
                 #     comm.distance = dist.function(distm, rsamplel[[1]], rsamplel[[2]]) 
@@ -189,9 +201,9 @@ CommuinityDistance <- function(network,
                 # 하는 방식을 구현해야 합니다.
 
                 
-                pb <- progress::progress_bar$new(total = random)
-                comm.distance.list = c()
-                for(j in 1:random){
+                # pb <- progress::progress_bar$new(total = random)
+
+                comm.distance.list = parSapply(cl, 1:random, function(j){
                     sind <- sample(tnodes, m1 + n1, replace = FALSE)
                     clusterAssignment <- clustermn(S[sind, sind], m1, n1)
                     Urand <- sind[clusterAssignment == 1]
@@ -199,13 +211,27 @@ CommuinityDistance <- function(network,
                     write.csv(Urand,paste0(dirn1,'/rand',j,'.csv'), row.names=F)
                     write.csv(Wrand,paste0(dirn2,'/rand',j,'.csv'), row.names=F)
                     comm.distance = dist.function(distm, Urand, Wrand) 
-                    comm.distance.list = c(comm.distance.list,comm.distance)
-                    pb$tick()
-                }
+                    return(comm.distance)
+                }) %>% unlist
+
+                # comm.distance.list = c()
+                # for(j in 1:random){
+                #     sind <- sample(tnodes, m1 + n1, replace = FALSE)
+                #     clusterAssignment <- clustermn(S[sind, sind], m1, n1)
+                #     Urand <- sind[clusterAssignment == 1]
+                #     Wrand <- sind[clusterAssignment == 2]         
+                #     write.csv(Urand,paste0(dirn1,'/rand',j,'.csv'), row.names=F)
+                #     write.csv(Wrand,paste0(dirn2,'/rand',j,'.csv'), row.names=F)
+                #     comm.distance = dist.function(distm, Urand, Wrand) 
+                #     comm.distance.list = c(comm.distance.list,comm.distance)
+                #     pb$tick()
+                # }
 
             } else {
             	stop('Please enter the right method for randomization.', call.=FALSE)
             }
+
+            stopCluster(cl)
 
 			xval = dist.function(distm, cl1g, cl2g) 
 			zval = (xval-mean(comm.distance.list))/sd(comm.distance.list)
