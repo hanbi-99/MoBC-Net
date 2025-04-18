@@ -40,13 +40,13 @@ modules=split(membership_info$node, membership_info$module)
 
 #----- run MoBC
 # run community distance
-dist.res <- CommuinityDistance(ppi,modules,randomMethod='RandCD',random=1000, ratio=0.5)
+dist.res <- CommuinityDistance(ppi,modules,randomMethod='RandCD',random=1000, ratio=0.5,nCore=3)
 re1 = dist.res$distance
 re2 = dist.res$filtered.modules
 re3 = dist.res$graph
 
 # run MoBC
-mobc.res <- MoBC.genes(ppi,module1.gene=modules[[1]],module2.gene = modules[[2]],randomMethod='RandCD',random=1000, ratio=0.5)
+mobc.res <- MoBC.genes(ppi,module1.gene=modules[[1]],module2.gene = modules[[2]],randomMethod='RandCD',random=1000, ratio=0.5,nCore=3)
 mobc.res %>% head
 
 ```
