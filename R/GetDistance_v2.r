@@ -238,6 +238,7 @@ CommuinityDistance <- function(network,
 			df1 = data.frame(Module1=names(comm.genelist)[m], Module2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
             pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
             df1$p.adj = p.adjust(pv,'BH')
+            df1$pvalue = pv
 			# cat('-end\n')
             fn1 = paste0('./MoBCtmp/Dist/',options,'/',idv,'_',randomMethod,'.RDS')
             saveRDS(re, file=fn1)
