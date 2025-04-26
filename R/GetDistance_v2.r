@@ -266,9 +266,9 @@ CommuinityDistance <- function(network,
     x$bag = binl
 
     xre = results
-    xre$weight = x$z_score -min(x$z_score)
+    xre$weight = xre$z_score -min(xre$z_score)
  
-    xre.ntkg = graph_from_data_frame(xre[,c('Module1','Module2','weight')], directed=FALSE)
+    xre.ntkg = igraph::graph_from_data_frame(xre[,c('Module1','Module2','weight')], directed=FALSE)
     xre.ntkg1 = mst(xre.ntkg)
     x$mst.net = xre.ntkg1
 
