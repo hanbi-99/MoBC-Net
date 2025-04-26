@@ -264,6 +264,17 @@ CommuinityDistance <- function(network,
     }
 
     x$bag = binl
+
+    xre = results
+    xre$weight = x$z_score -min(x$z_score)
+ 
+    xre.ntkg = graph_from_data_frame(xre[,c('Module1','Module2','weight')], directed=FALSE)
+    xre.ntkg1 = mst(xre.ntkg)
+    x$mst.net = xre.ntkg1
+
+   # xre$weight = -max(x$weight)
+
+
 	# x <- new("MoBCresult",
     #     MoBCresults = results,
     #     filtered.modules = comm.genelist,
