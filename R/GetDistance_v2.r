@@ -269,8 +269,8 @@ CommuinityDistance <- function(network,
     xre$weight = xre$z_score -min(xre$z_score)
  
     xre.ntkg = igraph::graph_from_data_frame(xre[,c('Module1','Module2','weight')], directed=FALSE)
-    xre.ntkg1 = mst(xre.ntkg)
-    x$mst.net = xre.ntkg1
+    # xre.ntkg1 = mst(xre.ntkg)
+    # x$mst.net = xre.ntkg1
 
    # xre$weight = -max(x$weight)
 

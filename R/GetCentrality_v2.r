@@ -275,6 +275,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
 	score.df$node_type = 'link'
 	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
 	score.df = score.df %>% dplyr::arrange(-score)
+    score.df = subset(score.df, score>0)
 
     colix = c('gene','score','node_type')
 
@@ -416,6 +417,7 @@ MoBC.genes <- function(network,
 					community1=comm.genelist[['module1']], 
 					community2=comm.genelist[['module2']],
                     random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
+    x = subset(x, score>0)
 	return(x)
 	}
 
