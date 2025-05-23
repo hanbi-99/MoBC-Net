@@ -19,6 +19,22 @@ get.freq.v2 <-function(g, snode, enode){
 }
 
 
+
+
+#' Calculate centrality between two modules from MoBC result 
+#' 
+#' 
+#' @title cal.MoBCgenes.values
+#' @param g graph
+#' @param community1 The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @param community2 The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @returns vector
+#' @export
+#' @examples
+#' cal.MoBCgenes.values(graph, 'module_1','module_2', allg)
+
+
+
 cal.MoBCgenes.values <- function(g, community1, community2, allg){
     
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
