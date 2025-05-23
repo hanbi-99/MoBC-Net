@@ -39,38 +39,48 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
     
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
 	shortestm = igraph::distances(g, community1, community2)
-	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
 
+
+    r.endNode = lengths(rmin) %>% sum
+    c.endNode = lengths(cmin) %>% sum
 
     # comm1
+	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
     r.sp.genel = sapply(names(rmin), function(start.node){
 		end.node = rmin[[start.node]]
-		etab = get.freq(g, start.node, end.node)
-        etab1 = etab %>% unlist %>% table
-        val = etab1/length(etab)
-		return(val[allg])
-	}) %>% t %>% 'colnames<-'(allg)
-    r.sp.genel[is.na(r.sp.genel)] = 0
-    r.val = apply(r.sp.genel,2,sum)
+        vv = sapply(end.node, function(endn){
+    		etab = get.freq(g, start.node, endn)
+            etab1 = etab %>% unlist %>% table
+            val = etab1/length(etab)
+    		return(val[allg])
+        }) %>% 'rownames<-'(allg)
+        vv[is.na(vv)] = 0
+        return(vv)
+	})
+    rval = do.call(cbind, r.sp.genel)
+    if(ncol(rval)!=r.endNode) stop('Not matched column number (r)', call. = FALSE)
+    r.val = apply(rval,1,sum)
 
     # comm2
 	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
     c.sp.genel = sapply(names(cmin), function(start.node){
 		end.node = cmin[[start.node]]
-		etab = get.freq(g, start.node, end.node)
-        etab1 = etab %>% unlist %>% table
-        val = etab1/length(etab)
-		return(val[allg])
-	}) %>% t %>% 'colnames<-'(allg)
-    c.sp.genel[is.na(c.sp.genel)] = 0
-    c.val = apply(c.sp.genel,2,sum)
+        vv = sapply(end.node, function(endn){
+    		etab = get.freq(g, start.node, endn)
+            etab1 = etab %>% unlist %>% table
+            val = etab1/length(etab)
+    		return(val[allg])
+        }) %>% 'rownames<-'(allg)
+        vv[is.na(vv)] = 0
+        return(vv)
+	})
+    cval = do.call(cbind, c.sp.genel)
+    if(ncol(cval)!=c.endNode) stop('Not matched column number (r)', call. = FALSE)
+    c.val = apply(cval,1,sum)
 
 
-    r.num = length(community1)
-    c.num = length(community2)
 
-
-    scorev = (r.val+c.val)/sum(r.num+c.num) #!!
+    scorev = (r.val+c.val)/sum(r.endNode+c.endNode) #!!
 
 	# score.df = data.frame(gene=allg,community1.score =as.numeric(r.val), community2.score=as.numeric(c.val), score=all.score)
     # scorev = score.df$community1.score + score.df$community2.score
