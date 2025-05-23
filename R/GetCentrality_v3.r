@@ -39,13 +39,14 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
     
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
 	shortestm = igraph::distances(g, community1, community2)
+	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
+	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
 
 
     r.endNode = lengths(rmin) %>% sum
     c.endNode = lengths(cmin) %>% sum
 
     # comm1
-	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
     r.sp.genel = sapply(names(rmin), function(start.node){
 		end.node = rmin[[start.node]]
         vv = sapply(end.node, function(endn){
@@ -62,7 +63,6 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
     r.val = apply(rval,1,sum)
 
     # comm2
-	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
     c.sp.genel = sapply(names(cmin), function(start.node){
 		end.node = cmin[[start.node]]
         vv = sapply(end.node, function(endn){
