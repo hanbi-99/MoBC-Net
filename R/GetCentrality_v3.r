@@ -34,7 +34,7 @@ get.freq.v2 <-function(g, snode, enode){
 #' cal.MoBCgenes.values(graph, 'module_1','module_2', allg)
 
 
-
+#--- new
 cal.MoBCgenes.values <- function(g, community1, community2, allg){
     
 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
@@ -88,6 +88,58 @@ cal.MoBCgenes.values <- function(g, community1, community2, allg){
 
 	return(scorev)
 }
+
+
+
+# #---- old version
+# cal.MoBCgenes.values <- function(g, community1, community2, allg){
+    
+# 	scorevec = rep(0, length(igraph::V(g))) %>% 'names<-'(igraph::V(g)$name)
+# 	shortestm = igraph::distances(g, community1, community2)
+# 	rmin  = apply(shortestm,1,function(xx) colnames(shortestm)[which(xx %in% min(xx))])
+
+#     # comm1
+#     r.sp.genel = sapply(names(rmin), function(start.node){
+# 		end.node = rmin[[start.node]]
+# 		etab = get.freq(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     r.pathn = sum(lengths(r.sp.genel))
+#     r.tab = unlist(r.sp.genel) %>% table %>% sort
+
+#     # comm2
+# 	cmin  = apply(shortestm,2,function(xx) rownames(shortestm)[which(xx %in% min(xx))])
+#     c.sp.genel = sapply(names(cmin), function(start.node){
+# 		end.node = cmin[[start.node]]
+# 		etab = get.freq(g, start.node, end.node)
+# 		return(etab)
+# 	})
+    
+#     c.pathn = sum(lengths(c.sp.genel))
+#     c.tab = unlist(c.sp.genel) %>% table %>% sort
+
+
+#     r.num = length(community1)
+#     c.num = length(community2)
+
+#     r.score = r.tab/r.pathn*c.num/sum(r.num+c.num) #!!
+#     c.score = c.tab/c.pathn*r.num/sum(r.num+c.num) #!!
+    
+#     r.score = r.score[allg] %>% 'names<-'(allg)
+#     c.score = c.score[allg] %>% 'names<-'(allg)
+#     r.score[is.na(r.score)] = 0
+#     c.score[is.na(c.score)] = 0
+
+# 	score.df = data.frame(gene=allg,community1.score =as.numeric(r.score), community2.score=as.numeric(c.score))
+#     scorev = score.df$community1.score + score.df$community2.score
+#     names(scorev) = allg
+
+# 	return(scorev)
+# }
+
+
+
 
 
 
@@ -269,6 +321,45 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
     colix = c('gene','score','node_type')
 
     if(cal.p!='None'){
+        colix = c('gene','normalized_score','node_type')
+        random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
+        pval = sapply(score.df$gene, function(gn){
+            xval = score.df[match(gn, score.df$gene),'score']
+            pval = sum(random.mat[gn,]>xval)/random
+        })
+        nscore = sapply(score.df$gene, function(gn){
+            xval = score.df[match(gn, score.df$gene),'score']
+            zvalv = c(random.mat[gn,],xval)
+            (xval-mean(zvalv))/sd(zvalv)
+        })
+        score.df$normalized_score = nscore
+        score.df$pval = pval
+        pv = sapply(score.df$pval, function(vv) ifelse(vv>0.5, 1-vv,vv))
+        score.df$p.adj = p.adjust(pv,'BH')
+        colix = c('gene','score','node_type','pval')
+
+    }
+	return(score.df[,colix])
+}
+
+
+
+
+cal.MoBCgenes_test <- function(g, community1, community2,random,ratio,cal.p, nCore){
+
+
+    allg = igraph::V(g)$name %>% as.character()
+    scorev = cal.MoBCgenes.values(g, community1, community2, allg)
+
+	score.df = data.frame(gene=allg,score=scorev)
+	score.df$node_type = 'link'
+	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
+	score.df = score.df %>% dplyr::arrange(-score)
+    score.df = subset(score.df, score>0)
+
+    colix = c('gene','score','node_type')
+
+    if(cal.p!='None'){
         random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
         pval = sapply(score.df$gene, function(gn){
             xval = score.df[match(gn, score.df$gene),'score']
@@ -280,9 +371,8 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
         colix = c('gene','score','node_type','pval')
 
     }
-	return(score.df[,colix])
+	return(list(res=score.df[,colix],random=random.mat))
 }
-
 
 
 
@@ -407,6 +497,48 @@ MoBC.genes <- function(network,
 					community2=comm.genelist[['module2']],
                     random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
     x = subset(x, score>0)
+	return(x)
+	}
+
+
+
+MoBC.genes_test <- function(network,
+                             module1.gene, module2.gene,
+                             randomMethod=c('None','RandC','RandCD','RandCM','RandCDM'),
+							 random = 1000,
+                             nCore=1,
+                             ratio = 0.1) {
+    overlap_filtering=TRUE
+    # cat(method,'\n')
+    if (is.character(randomMethod)){
+        randomMethod <- match.arg(randomMethod)
+        # cat(dist.function,'\n')
+        randomMethod <- switch(randomMethod,
+            None = 'None',
+            RandC = 'random1',
+            RandCD = 'random2',
+            RandCM = 'random3',
+            RandCDM = 'random4')
+    } else {
+        stop('Method function is wrong. Check the method function', call.=FALSE)
+    }
+	if (is.null(module1.gene) | is.null(module2.gene)) {
+		stop('Module gene list is empty', call.=FALSE)
+	}
+	if (any(is.na(module1.gene)) | any(is.na(module1.gene))) {
+		stop('Please assign right node names', call.=FALSE)
+	}
+    module.genelist = list(module1=module1.gene, module2=module2.gene)
+	g.res  <- preprocessedNetwork(network)
+    comm.genelist <- CommunityGenelist(module.genelist, g.res, overlap_filtering = overlap_filtering)
+
+	communities = comm.genelist
+
+	x=cal.MoBCgenes_test(g.res, 
+					community1=comm.genelist[['module1']], 
+					community2=comm.genelist[['module2']],
+                    random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
+    # x = subset(x, score>0)
 	return(x)
 	}
 
