@@ -83,10 +83,10 @@ estimate_deg_bag <- function(deg, membership, ratiov, ncv = 1000) {
   # 첫 번째 while 루프
   # MATLAB: while prod(ncases > threshold) ~= 1
   # R: while (!all(ncases > threshold))
-  while (!all(ncases > threshold)) {
+  while (!all(ncases >= threshold)) {
     # pt = max(find(ncases < threshold)) : 마지막으로 조건 미충족인 인덱스
     pt <- max(which(ncases < threshold))
-    
+    cat(pt,'\n')
     # pt가 1이 아닌 경우 이전 bag과 병합, 1인 경우 다음 bag과 병합
     if (pt != 1) {
       deg_bag[[pt - 1]] <- c(deg_bag[[pt - 1]], deg_bag[[pt]])
