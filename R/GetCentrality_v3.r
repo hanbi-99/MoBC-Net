@@ -335,7 +335,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
     colix = c('gene','score','node_type')
 
     if(cal.p!='None'){
-        cat('Normalized MoBC score will be provided.')
+        cat('Normalized MoBC score will be provided.\n')
         colix = c('gene','normalized_score','node_type')
         random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
         pval = sapply(score.df$gene, function(gn){
