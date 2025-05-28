@@ -512,7 +512,7 @@ MoBC.genes <- function(network,
 					community1=comm.genelist[['module1']], 
 					community2=comm.genelist[['module2']],
                     random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
-    x = subset(x, score>0)
+    # x = subset(x, score>0)
 	return(x)
 	}
 
