@@ -306,6 +306,20 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
 
 
+#' Calculate centrality between two modules from MoBC result 
+#' 
+#' 
+#' @title cal.MoBCgenes
+#' @param g graph
+#' @param community1 The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @param community2 The name of the module for which centrality is being calculated. This should be one of the communities provided as input
+#' @returns vector
+#' @export
+#' @examples
+#' cal.MoBCgenes(graph, 'community1','community2',random,ratio,cal.p, nCore)
+
+
+
 cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
 
 
@@ -345,34 +359,34 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
 
 
 
-cal.MoBCgenes_test <- function(g, community1, community2,random,ratio,cal.p, nCore){
+# cal.MoBCgenes_test <- function(g, community1, community2,random,ratio,cal.p, nCore){
 
 
-    allg = igraph::V(g)$name %>% as.character()
-    scorev = cal.MoBCgenes.values(g, community1, community2, allg)
+#     allg = igraph::V(g)$name %>% as.character()
+#     scorev = cal.MoBCgenes.values(g, community1, community2, allg)
 
-	score.df = data.frame(gene=allg,score=scorev)
-	score.df$node_type = 'link'
-	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
-	score.df = score.df %>% dplyr::arrange(-score)
-    score.df = subset(score.df, score>0)
+# 	score.df = data.frame(gene=allg,score=scorev)
+# 	score.df$node_type = 'link'
+# 	score.df$node_type[score.df$gene %in% c(community1, community2)] = 'community genes'
+# 	score.df = score.df %>% dplyr::arrange(-score)
+#     score.df = subset(score.df, score>0)
 
-    colix = c('gene','score','node_type')
+#     colix = c('gene','score','node_type')
 
-    if(cal.p!='None'){
-        random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
-        pval = sapply(score.df$gene, function(gn){
-            xval = score.df[match(gn, score.df$gene),'score']
-            pval = sum(random.mat[gn,]>xval)/random
-        })
-        score.df$pval = pval
-        pv = sapply(score.df$pval, function(vv) ifelse(vv>0.5, 1-vv,vv))
-        score.df$p.adj = p.adjust(pv,'BH')
-        colix = c('gene','score','node_type','pval')
+#     if(cal.p!='None'){
+#         random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
+#         pval = sapply(score.df$gene, function(gn){
+#             xval = score.df[match(gn, score.df$gene),'score']
+#             pval = sum(random.mat[gn,]>xval)/random
+#         })
+#         score.df$pval = pval
+#         pv = sapply(score.df$pval, function(vv) ifelse(vv>0.5, 1-vv,vv))
+#         score.df$p.adj = p.adjust(pv,'BH')
+#         colix = c('gene','score','node_type','pval')
 
-    }
-	return(list(res=score.df[,colix],random=random.mat))
-}
+#     }
+# 	return(list(res=score.df[,colix],random=random.mat))
+# }
 
 
 
@@ -502,45 +516,45 @@ MoBC.genes <- function(network,
 
 
 
-MoBC.genes_test <- function(network,
-                             module1.gene, module2.gene,
-                             randomMethod=c('None','RandC','RandCD','RandCM','RandCDM'),
-							 random = 1000,
-                             nCore=1,
-                             ratio = 0.1) {
-    overlap_filtering=TRUE
-    # cat(method,'\n')
-    if (is.character(randomMethod)){
-        randomMethod <- match.arg(randomMethod)
-        # cat(dist.function,'\n')
-        randomMethod <- switch(randomMethod,
-            None = 'None',
-            RandC = 'random1',
-            RandCD = 'random2',
-            RandCM = 'random3',
-            RandCDM = 'random4')
-    } else {
-        stop('Method function is wrong. Check the method function', call.=FALSE)
-    }
-	if (is.null(module1.gene) | is.null(module2.gene)) {
-		stop('Module gene list is empty', call.=FALSE)
-	}
-	if (any(is.na(module1.gene)) | any(is.na(module1.gene))) {
-		stop('Please assign right node names', call.=FALSE)
-	}
-    module.genelist = list(module1=module1.gene, module2=module2.gene)
-	g.res  <- preprocessedNetwork(network)
-    comm.genelist <- CommunityGenelist(module.genelist, g.res, overlap_filtering = overlap_filtering)
+# MoBC.genes_test <- function(network,
+#                              module1.gene, module2.gene,
+#                              randomMethod=c('None','RandC','RandCD','RandCM','RandCDM'),
+# 							 random = 1000,
+#                              nCore=1,
+#                              ratio = 0.1) {
+#     overlap_filtering=TRUE
+#     # cat(method,'\n')
+#     if (is.character(randomMethod)){
+#         randomMethod <- match.arg(randomMethod)
+#         # cat(dist.function,'\n')
+#         randomMethod <- switch(randomMethod,
+#             None = 'None',
+#             RandC = 'random1',
+#             RandCD = 'random2',
+#             RandCM = 'random3',
+#             RandCDM = 'random4')
+#     } else {
+#         stop('Method function is wrong. Check the method function', call.=FALSE)
+#     }
+# 	if (is.null(module1.gene) | is.null(module2.gene)) {
+# 		stop('Module gene list is empty', call.=FALSE)
+# 	}
+# 	if (any(is.na(module1.gene)) | any(is.na(module1.gene))) {
+# 		stop('Please assign right node names', call.=FALSE)
+# 	}
+#     module.genelist = list(module1=module1.gene, module2=module2.gene)
+# 	g.res  <- preprocessedNetwork(network)
+#     comm.genelist <- CommunityGenelist(module.genelist, g.res, overlap_filtering = overlap_filtering)
 
-	communities = comm.genelist
+# 	communities = comm.genelist
 
-	x=cal.MoBCgenes_test(g.res, 
-					community1=comm.genelist[['module1']], 
-					community2=comm.genelist[['module2']],
-                    random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
-    # x = subset(x, score>0)
-	return(x)
-	}
+# 	x=cal.MoBCgenes_test(g.res, 
+# 					community1=comm.genelist[['module1']], 
+# 					community2=comm.genelist[['module2']],
+#                     random=random, ratio=ratio,cal.p=randomMethod, nCore=nCore)
+#     # x = subset(x, score>0)
+# 	return(x)
+# 	}
 
 
 
