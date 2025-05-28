@@ -352,7 +352,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
         score.df$pval = pval
         pv = sapply(score.df$pval, function(vv) ifelse(vv>0.5, 1-vv,vv))
         score.df$p.adj = p.adjust(pv,'BH')
-        colix = c('gene','normalized_score','node_type','pval','p.adj')
+        colix = c('gene','score','normalized_score','node_type','pval','p.adj')
 
     }
 	return(score.df[,colix])
