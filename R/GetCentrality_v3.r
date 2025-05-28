@@ -322,7 +322,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
 
 cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
 
-    cat('cal.MoBCgenes')
+    # cat('cal.MoBCgenes')
 
     allg = igraph::V(g)$name %>% as.character()
     scorev = cal.MoBCgenes.values(g, community1, community2, allg)
@@ -334,7 +334,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
     score.df = subset(score.df, score>0)
 
     colix = c('gene','score','node_type')
-    cat('test.\n')
+    # cat('test.\n')
     if(cal.p!='None'){
         cat('Normalized MoBC score will be provided.\n')
         colix = c('gene','normalized_score','node_type')
@@ -352,7 +352,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
         score.df$pval = pval
         pv = sapply(score.df$pval, function(vv) ifelse(vv>0.5, 1-vv,vv))
         score.df$p.adj = p.adjust(pv,'BH')
-        colix = c('gene','score','node_type','pval')
+        colix = c('gene','normalized_score','node_type','pval','p.adj')
 
     }
 	return(score.df[,colix])
