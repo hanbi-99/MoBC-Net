@@ -215,7 +215,7 @@ cal.MoBC.random <- function(g, community1, community2,random,ratio,cal.p,show.bi
         comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
 
     } else if(cal.p=='random2'){
-        hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random)
+        hist.bin0 = estimate_deg_bag(deg, membership, ratiov=ratio, ncv=random) 
         hist.bin = hist.bin0$node_bag
         names(hist.bin) = 1:length(hist.bin)
         comm.distance.list = parallel::mclapply(1:random, mc.cores=nCore, function(j){
@@ -335,6 +335,7 @@ cal.MoBCgenes <- function(g, community1, community2,random,ratio,cal.p, nCore){
     colix = c('gene','score','node_type')
 
     if(cal.p!='None'){
+        cat('Normalized MoBC score will be provided.')
         colix = c('gene','normalized_score','node_type')
         random.mat = cal.MoBC.random(g, community1, community2,random,ratio,cal.p,show.binning=FALSE, nCore=nCore)
         pval = sapply(score.df$gene, function(gn){
