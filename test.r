@@ -43,6 +43,10 @@ class(dist.results[[3]])
 plotDist(dist.results)
 re1 = MoBC.genes(dist.results, 'union.C2_62','union.C1_83')
 
+p1 = plot.MoBC.genes(dist.results,  community1.name='1', community2.name='2', 
+            top=10, community1.color = 'lightpink',community2.color = 'lightblue1')
+
+p2 = plot.Dist(dist.results)
 
 # re1= Get.ConnectingGene(dist.results, 'union.C6_16','union.C2_62')
 # re2= Get.ConnectingGene(dist.results, 'Stat3','union.C2_62')
